@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Préstamos - FinanzasOS</title>
+    <!-- Premium Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        .credit-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .credit-card {
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .credit-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .credit-card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .credit-card-stats {
+            display: flex;
+            gap: 2rem;
+            margin-top: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-box {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            flex: 1;
+            text-align: center;
+        }
+
+        .stat-box p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-box h4 {
+            font-size: 1.1rem;
+            color: white;
+        }
+
+        .credit-body {
+            display: none;
+            margin-top: 1rem;
+        }
+
+        .credit-body.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .installment-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .installment-table th,
+        .installment-table td {
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid var(--surface-border);
+            text-align: center;
+        }
+
+        .installment-table th {
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+        }
+
+        .status-paid {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        .pay-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+        }
+
+        .pay-btn:hover {
+            opacity: 0.9;
+        }
+
+        .pay-btn:disabled {
+            background: var(--surface-border);
+            color: var(--text-muted);
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Sidebar content identical to other pages -->
+            <div class="sidebar-header">
+                <i class="fas fa-wallet" style="color: var(--primary)"></i> FinanzasOS
+            </div>
+            <nav id="sidebar-nav">
+                <!-- Se poblará vía JS para mantener DRY -->
+            </nav>
+            <div class="sidebar-footer">
+                <div id="userProfileName" style="color: white; margin-bottom: 1rem; font-weight:500;"></div>
+                <a href="#" class="nav-link" id="logoutBtn" style="color: var(--danger)">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="credit-header">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <h2>Lista de Préstamos</h2>
+                </div>
+                <a href="loans.html" class="btn btn-primary" style="text-decoration: none;">
+                    <i class="fas fa-plus"></i> Simular Nuevo
+                </a>
+            </header>
+
+            <div id="creditsList" class="animate-fade-in">
+                <!-- Los créditos se renderizarán aquí -->
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        // Sidebar Navigator Injector para no duplicar código base en credits
+        const navItems = [
+            { href: 'dashboard.html', id: 'nav-dashboard', icon: 'fa-th-large', text: 'Dashboard' },
+            { href: 'budgets.html', id: 'nav-budgets', icon: 'fa-bullseye', text: 'Presupuestos' },
+            { href: 'accounts.html', id: 'nav-accounts', icon: 'fa-credit-card', text: 'Cuentas' },
+            { href: 'transactions.html', id: 'nav-transactions', icon: 'fa-exchange-alt', text: 'Transacciones' },
+            { href: 'loans.html', id: 'nav-loans', icon: 'fa-calculator', text: 'Calculadora Amort.' },
+            { href: 'credits.html', id: 'nav-credits', icon: 'fa-list', text: 'Lista de Préstamos', active: true }
+        ];
+
+        document.getElementById('sidebar-nav').innerHTML = navItems.map(item => `
+            <a href="${item.href}" class="nav-link ${item.active ? 'active' : ''}" id="${item.id}">
+                <i class="fas ${item.icon}"></i> ${item.text}
+            </a>
+        `).join('');
+    </script>
+    <script src="./js/credits.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transacciones - FinanzasOS</title>
+    <!-- Premium Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        .table-container {
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--surface-border);
+            margin-top: 1.5rem;
+            overflow-x: auto;
+        }
+
+        .chart-container-tx {
+            background: var(--surface);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            border: 1px solid var(--surface-border);
+            margin-top: 1.5rem;
+            flex: 1;
+            min-width: 300px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-wallet" style="color: var(--primary)"></i> FinanzasOS
+            </div>
+            <nav>
+                <a href="dashboard.html" class="nav-link" id="nav-dashboard">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+                <a href="budgets.html" class="nav-link" id="nav-budgets">
+                    <i class="fas fa-bullseye"></i> Presupuestos
+                </a>
+                <a href="accounts.html" class="nav-link" id="nav-accounts">
+                    <i class="fas fa-credit-card"></i> Cuentas
+                </a>
+                <a href="transactions.html" class="nav-link active" id="nav-transactions">
+                    <i class="fas fa-exchange-alt"></i> Transacciones
+                </a>
+                <a href="loans.html" class="nav-link" id="nav-loans">
+                    <i class="fas fa-calculator"></i> Calculadora Amort.
+                </a>
+                <a href="credits.html" class="nav-link" id="nav-credits">
+                    <i class="fas fa-list"></i> Lista de Préstamos
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <div id="userProfileName" style="color: white; margin-bottom: 1rem; font-weight:500;"></div>
+                <a href="#" class="nav-link" id="logoutBtn" style="color: var(--danger)">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header-top">
+                <div style="display: flex; align-items: center; gap: 1rem;">
+                    <h2>Mis Transacciones</h2>
+                </div>
+                <div style="display:flex; gap: 1rem;">
+                    <button class="btn" id="newTransactionBtn" style="width: auto;">
+                        <i class="fas fa-plus"></i> Nueva Transacción
+                    </button>
+                </div>
+            </header>
+
+            <!-- Chart Section -->
+            <div style="display: flex; gap: 1.5rem; flex-wrap: wrap;">
+                <div class="chart-container-tx animate-fade-in" style="animation-delay: 0.1s;">
+                    <h3 class="card-title" style="margin-bottom: 1rem;">Ingresos vs Gastos (Anual)</h3>
+                    <div style="position: relative; height: 250px; width: 100%;">
+                        <canvas id="txHistoryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-container animate-fade-in" style="animation-delay: 0.2s;">
+                <h3 class="card-title" style="margin-bottom: 1rem;">Historial Completo</h3>
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Descripción</th>
+                            <th>Categoría</th>
+                            <th>Cuenta</th>
+                            <th>Monto</th>
+                            <th style="text-align: right;">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="txTableBody">
+                        <tr>
+                            <td colspan="6" style="text-align: center; color: var(--text-muted);">Cargando
+                                transacciones...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Transacción -->
+    <div class="modal-overlay" id="txModal">
+        <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
+            <div class="modal-header">
+                <h3 class="modal-title">Registrar Transacción</h3>
+                <button class="modal-close" id="closeTxModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="txForm" style="display: flex; flex-direction: column; gap: 1rem;">
+                    <div class="form-group">
+                        <label>Tipo</label>
+                        <select id="txType" class="form-control" required>
+                            <option style="color:black" value="expense">Gasto</option>
+                            <option style="color:black" value="income">Ingreso</option>
+                            <option style="color:black" value="transfer">Transferencia</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="display: flex; gap: 1rem;">
+                        <div style="flex: 1;">
+                            <label>Monto</label>
+                            <input type="number" step="0.01" id="txAmount" class="form-control" required
+                                placeholder="0.00">
+                        </div>
+                        <div style="flex: 1;">
+                            <label>Fecha</label>
+                            <input type="date" id="txDate" class="form-control" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="accountGroup">
+                        <label id="accountLabel">Cuenta de Origen</label>
+                        <select id="txAccount" class="form-control" required></select>
+                    </div>
+
+                    <div class="form-group" id="targetAccountGroup" style="display: none;">
+                        <label>Cuenta de Destino</label>
+                        <select id="txTargetAccount" class="form-control"></select>
+                    </div>
+
+                    <div class="form-group" id="categoryGroup">
+                        <label>Categoría</label>
+                        <select id="txCategory" class="form-control" required></select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Nota / Descripción</label>
+                        <input type="text" id="txNote" class="form-control" placeholder="Opcional">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">Guardar
+                        Transacción</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="./js/transactions.js"></script>
+</body>
+
+</html>

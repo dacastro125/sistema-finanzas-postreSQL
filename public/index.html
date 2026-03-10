@@ -1,0 +1,75 @@
+<!DOCTYPE এন্টি>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finanzas Personales - Ingreso</title>
+    <!-- Premium Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="auth-card animate-fade-in" id="loginCard">
+        <h1>FinanzasOS</h1>
+        <p class="subtitle">Bienvenido de nuevo, gestiona tu patrimonio.</p>
+        
+        <form id="loginForm">
+            <div id="loginAlert" class="hidden" style="color: var(--danger); margin-bottom: 1rem; font-size: 0.9rem; text-align:center;"></div>
+            
+            <div class="form-group">
+                <label for="loginEmail">Correo Electrónico</label>
+                <input type="email" id="loginEmail" class="form-control" placeholder="usuario@correo.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="loginPassword">Contraseña</label>
+                <input type="password" id="loginPassword" class="form-control" placeholder="••••••••" required>
+            </div>
+            
+            <button type="submit" class="btn">Ingresar <i class="fas fa-arrow-right ml-2"></i></button>
+        </form>
+        
+        <div class="auth-switch">
+            ¿No tienes cuenta? <a href="#" id="showRegister">Regístrate aquí</a>
+        </div>
+    </div>
+
+    <!-- Register Card -->
+    <div class="auth-card animate-fade-in hidden" id="registerCard">
+        <h1>Únete a FinanzasOS</h1>
+        <p class="subtitle">Comienza a tomar el control de tu dinero hoy.</p>
+        
+        <form id="registerForm">
+            <div id="registerAlert" class="hidden" style="color: var(--danger); margin-bottom: 1rem; font-size: 0.9rem; text-align:center;"></div>
+            
+            <div class="form-group">
+                <label for="regName">Nombre Completo</label>
+                <input type="text" id="regName" class="form-control" placeholder="Juan Pérez" required>
+            </div>
+
+            <div class="form-group">
+                <label for="regEmail">Correo Electrónico</label>
+                <input type="email" id="regEmail" class="form-control" placeholder="usuario@correo.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="regPassword">Contraseña</label>
+                <input type="password" id="regPassword" class="form-control" placeholder="••••••••" required>
+            </div>
+            
+            <button type="submit" class="btn">Registrarme <i class="fas fa-user-plus ml-2"></i></button>
+        </form>
+        
+        <div class="auth-switch">
+            ¿Ya tienes cuenta? <a href="#" id="showLogin">Inicia sesión</a>
+        </div>
+    </div>
+</div>
+
+<script src="./js/auth.js"></script>
+</body>
+</html>

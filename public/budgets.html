@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Presupuestos - Finanzas Personales</title>
+    <!-- Premium Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        .budget-card {
+            background: var(--surface);
+            border: 1px solid var(--surface-border);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s;
+        }
+
+        .budget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .budget-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .budget-color-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+
+        .budget-actions button {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s;
+            margin-left: 0.5rem;
+        }
+
+        .budget-actions button:hover {
+            color: white;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 0.5rem;
+        }
+
+        .progress-bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .budget-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-wallet" style="color: var(--primary)"></i> FinanzasOS
+            </div>
+
+            <nav>
+                <a href="dashboard.html" class="nav-link" id="nav-dashboard">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+                <a href="budgets.html" class="nav-link active" id="nav-budgets">
+                    <i class="fas fa-bullseye"></i> Presupuestos
+                </a>
+                <a href="accounts.html" class="nav-link" id="nav-accounts">
+                    <i class="fas fa-credit-card"></i> Cuentas
+                </a>
+                <a href="transactions.html" class="nav-link" id="nav-transactions">
+                    <i class="fas fa-exchange-alt"></i> Transacciones
+                </a>
+                <a href="loans.html" class="nav-link" id="nav-loans">
+                    <i class="fas fa-calculator"></i> Calculadora Amort.
+                </a>
+                <a href="credits.html" class="nav-link" id="nav-credits">
+                    <i class="fas fa-list"></i> Lista de Préstamos
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div id="userProfileName" style="color: white; margin-bottom: 1rem; font-weight:500;"></div>
+                <a href="#" class="nav-link" id="logoutBtn" style="color: var(--danger)">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="header-top">
+                <h2>Control de Presupuestos</h2>
+                <p style="color: var(--text-muted); margin-top: 0.5rem;">Vigila tus límites de gasto mensual por
+                    categoría.</p>
+            </header>
+
+            <div id="budgetsContainer" class="budget-grid">
+                <!-- JS Inject here -->
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Modal Setting Budget -->
+    <div class="modal-overlay" id="budgetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Establecer Presupuesto</h3>
+                <button class="modal-close" id="closeBudgetModal"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="budgetForm">
+                <input type="hidden" id="budgetCategId">
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <input type="text" id="budgetCategName" class="form-control" disabled
+                        style="background: rgba(255,255,255,0.05);">
+                </div>
+                <div class="form-group">
+                    <label>Límite Mensual ($) - Pon 0 para deshabilitar</label>
+                    <input type="number" step="0.01" id="budgetLimitAmount" class="form-control" required>
+                </div>
+                <button type="submit" class="btn">Guardar Presupuesto</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="./js/budgets.js"></script>
+
+</body>
+
+</html>
