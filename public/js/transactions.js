@@ -121,8 +121,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('txAccount').value = tx.accountId;
         document.getElementById('txCategory').value = tx.categoryId;
 
-        const localDate = new Date(tx.date);
-        document.getElementById('txDate').value = localDate.toISOString().split('T')[0];
+        // Extraer formato YYYY-MM-DD directo del string de la DB sin parsear UTC
+        document.getElementById('txDate').value = tx.date.split('T')[0];
         document.getElementById('txNote').value = tx.note || '';
 
         txModal.classList.add('active');
@@ -232,7 +232,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
         txTableBody.innerHTML = transactionsData.map(tx => {
             const isIncome = tx.type === 'income';
-            const dateStr = new Date(tx.date).toLocaleDateString();
+            
+            // Forzar fecha neutra neutra para evitar conversiones -5h
+            const [y, m, d] = tx.date.split('T')[0].split('-');
+            const neutralDate = new Date(y, m - 1, d);
+            const dateStr = neutralDate.toLocaleDateString();
+            
             const amountFormatted = formatter.format(tx.amount);
 
             const cat = categoriesData.find(c => c.id === tx.categoryId);
@@ -283,10 +288,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentYear = new Date().getFullYear();
 
         transactionsData.forEach(tx => {
-            const d = new Date(tx.date);
-            if (d.getFullYear() === currentYear && tx.type !== 'transfer') {
+            const [y, m, d] = tx.date.split('T')[0].split('-');
+            const neutralDate = new Date(y, m - 1, d);
+            
+            if (neutralDate.getFullYear() === currentYear && tx.type !== 'transfer') {
                 const mapArr = tx.type === 'income' ? incomes : expenses;
-                mapArr[d.getMonth()] += tx.amount;
+                mapArr[neutralDate.getMonth()] += tx.amount;
             }
         });
 

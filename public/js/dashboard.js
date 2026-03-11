@@ -112,7 +112,10 @@ document.addEventListener('DOMContentLoaded', () => {
             const sign = isIncome ? '+' : '-';
             const colorClass = isIncome ? 'text-success' : 'text-danger';
 
-            const dateStr = new Date(tx.date).toLocaleDateString();
+            // Forzar fecha neutra sin zona horaria
+            const [y, m, d] = tx.date.split('T')[0].split('-');
+            const neutralDate = new Date(y, m - 1, d);
+            const dateStr = neutralDate.toLocaleDateString();
 
             return `
                 <div class="transaction-item" data-id="${tx.id}">

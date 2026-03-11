@@ -228,9 +228,8 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('txAccount').value = tx.accountId;
         document.getElementById('txCategory').value = tx.categoryId;
 
-        // Format date string for input type="date"
-        const localDate = new Date(tx.date);
-        document.getElementById('txDate').value = localDate.toISOString().split('T')[0];
+        // Extraer formato YYYY-MM-DD directo del string de la DB sin parsear UTC
+        document.getElementById('txDate').value = tx.date.split('T')[0];
 
         document.getElementById('txNote').value = tx.note || '';
 
