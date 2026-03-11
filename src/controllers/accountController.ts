@@ -1,7 +1,7 @@
 import { Response } from 'express';
 import { AccountModel } from '../models/Account';
-import { TransactionModel } from '../models/Transaction';
 import { AuthRequest } from '../middleware/authMiddleware';
+import { prisma } from '../utils/prisma';
 
 export const getAccounts = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
@@ -40,10 +40,12 @@ export const deleteAccount = async (req: AuthRequest, res: Response): Promise<vo
         const userId = req.user!.id;
         const accountId = req.params.id;
 
-        // Verificar si existen transacciones ligadas a esta cuenta
-        const transactions = await TransactionModel.findAllByUserId(userId);
-        const hasTransactions = transactions.some(t => t.accountId === accountId);
-        if (hasTransactions) {
+        // Verificar si existen transacciones ligadas a esta cuenta usando Prisma directly para evitar volcar la BD en RAM
+        const transactionExists = await prisma.transaction.findFirst({
+            where: { userId, accountId: accountId as string }
+        });
+
+        if (transactionExists) {
             res.status(400).json({ error: 'No se puede eliminar la cuenta porque tiene transacciones asociadas. Elimina las transacciones primero.' });
             return;
         }

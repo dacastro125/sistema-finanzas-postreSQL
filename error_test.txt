@@ -1,0 +1,44 @@
+Connecting to Prisma...
+(node:19616) Warning: SECURITY WARNING: The SSL modes 'prefer', 'require', and 'verify-ca' are treated as aliases for 'verify-full'.
+In the next major version (pg-connection-string v3.0.0 and pg v9.0.0), these modes will adopt standard libpq semantics, which have weaker security guarantees.
+
+To prepare for this change:
+- If you want the current behavior, explicitly use 'sslmode=verify-full'
+- If you want libpq compatibility now, use 'uselibpqcompat=true&sslmode=require'
+
+See https://www.postgresql.org/docs/current/libpq-ssl.html for libpq SSL mode definitions.
+(Use `node --trace-warnings ...` to show where the warning was created)
+Prisma Error: PrismaClientKnownRequestError: 
+Invalid `prisma.user.findMany()` invocation in
+C:\Users\DIEGO\Documents\sistemaGestionFinanciera\src\test-prisma.ts:6:41
+
+  3 async function test() {
+  4     try {
+  5         console.log('Connecting to Prisma...');
+→ 6         const users = await prisma.user.findMany(
+Error opening a TLS connection: self-signed certificate in certificate chain
+    at zr.handleRequestError (C:\Users\DIEGO\Documents\sistemaGestionFinanciera\node_modules\@prisma\client\src\runtime\RequestHandler.ts:237:13)
+    at zr.handleAndLogRequestError (C:\Users\DIEGO\Documents\sistemaGestionFinanciera\node_modules\@prisma\client\src\runtime\RequestHandler.ts:183:12)
+    at zr.request (C:\Users\DIEGO\Documents\sistemaGestionFinanciera\node_modules\@prisma\client\src\runtime\RequestHandler.ts:152:12)
+    at processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async a (C:\Users\DIEGO\Documents\sistemaGestionFinanciera\node_modules\@prisma\client\src\runtime\getPrismaClient.ts:808:24)
+    at async test (C:\Users\DIEGO\Documents\sistemaGestionFinanciera\src\test-prisma.ts:6:23) {
+  code: 'P1011',
+  meta: {
+    modelName: 'User',
+    driverAdapterError: DriverAdapterError: TlsConnectionError
+        at PrismaPgAdapter.onError (C:\Users\DIEGO\Documents\sistemaGestionFinanciera\node_modules\@prisma\adapter-pg\dist\index.js:687:11)
+        at PrismaPgAdapter.performIO (C:\Users\DIEGO\Documents\sistemaGestionFinanciera\node_modules\@prisma\adapter-pg\dist\index.js:682:12)
+        at processTicksAndRejections (node:internal/process/task_queues:104:5)
+        at async PrismaPgAdapter.queryRaw (C:\Users\DIEGO\Documents\sistemaGestionFinanciera\node_modules\@prisma\adapter-pg\dist\index.js:602:30)
+        at async e.interpretNode (C:\Users\DIEGO\Documents\sistemaGestionFinanciera\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:186:26)
+        at async e.interpretNode (C:\Users\DIEGO\Documents\sistemaGestionFinanciera\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:272:41)
+        at async e.run (C:\Users\DIEGO\Documents\sistemaGestionFinanciera\node_modules\@prisma\client-engine-runtime\src\interpreter\query-interpreter.ts:94:23)
+        at async execute (C:\Users\DIEGO\Documents\sistemaGestionFinanciera\node_modules\@prisma\client\src\runtime\core\engines\client\LocalExecutor.ts:81:12)
+        at async jt.request (C:\Users\DIEGO\Documents\sistemaGestionFinanciera\node_modules\@prisma\client\src\runtime\core\engines\client\ClientEngine.ts:492:22)
+        at async Object.singleLoader (C:\Users\DIEGO\Documents\sistemaGestionFinanciera\node_modules\@prisma\client\src\runtime\RequestHandler.ts:112:26) {
+      cause: [Object]
+    }
+  },
+  clientVersion: '7.4.2'
+}

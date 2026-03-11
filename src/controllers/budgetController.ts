@@ -1,37 +1,47 @@
 import { Response } from 'express';
 import { BudgetModel } from '../models/Budget';
-import { TransactionModel } from '../models/Transaction';
 import { CategoryModel } from '../models/Category';
 import { AuthRequest } from '../middleware/authMiddleware';
+import { prisma } from '../utils/prisma';
 
 export const getBudgetsWithProgress = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const userId = req.user!.id;
 
-        const budgets = await BudgetModel.findAllByUserId(userId);
-        const allCategories = await CategoryModel.findAllByUserId(userId);
+        const now = new Date();
+        const monthStr = String(now.getMonth() + 1).padStart(2, '0');
+        const yearStr = String(now.getFullYear());
+        const datePrefix = `${yearStr}-${monthStr}-`;
+
+        // Consultas optimizadas en paralelo. Agrupamos los gastos directo en Postgres.
+        const [budgets, allCategories, expensesByCategory] = await Promise.all([
+            BudgetModel.findAllByUserId(userId),
+            CategoryModel.findAllByUserId(userId),
+            prisma.transaction.groupBy({
+                by: ['categoryId'],
+                _sum: { amount: true },
+                where: { 
+                    userId, 
+                    type: 'expense', 
+                    date: { startsWith: datePrefix }, 
+                    categoryId: { not: null } 
+                }
+            })
+        ]);
+
         const categories = allCategories.filter(c => c.type === 'expense');
 
-        // Obtener gastos del mes actual
-        const now = new Date();
-        const currentMonth = now.getMonth();
-        const currentYear = now.getFullYear();
-
-        const allTransactions = await TransactionModel.findAllByUserId(userId);
-        const monthlyExpenses = allTransactions.filter(t => {
-            const tDate = new Date(t.date);
-            return t.type === 'expense' && tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear;
-        });
+        // Mapa rápido para gastos O(1)
+        const spentMap = expensesByCategory.reduce((map, expense) => {
+            if (expense.categoryId) map[expense.categoryId] = expense._sum.amount || 0;
+            return map;
+        }, {} as Record<string, number>);
 
         // Construir la respuesta con el progreso
         const results = categories.map(cat => {
             const budget = budgets.find(b => b.categoryId === cat.id);
             const limitAmount = budget ? budget.limitAmount : 0;
-
-            const spentAmount = monthlyExpenses
-                .filter(t => t.categoryId === cat.id)
-                .reduce((sum, t) => sum + t.amount, 0);
-
+            const spentAmount = spentMap[cat.id] || 0;
             const percentage = limitAmount > 0 ? Math.min((spentAmount / limitAmount) * 100, 100) : 0;
 
             return {

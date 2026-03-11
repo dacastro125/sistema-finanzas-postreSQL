@@ -1,43 +1,47 @@
 import { Response } from 'express';
 import { AccountModel } from '../models/Account';
-import { TransactionModel } from '../models/Transaction';
 import { AuthRequest } from '../middleware/authMiddleware';
+import { prisma } from '../utils/prisma';
 
 export const getDashboardSummary = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const userId = req.user!.id;
 
-        // 1. Obtener todas las cuentas y calcular saldo total
-        const accounts = await AccountModel.findAllByUserId(userId);
-        const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
-
-        // 2. Obtener las transacciones del usuario
-        const transactions = await TransactionModel.findAllByUserId(userId);
-
-        // 3. Obtener parámetros de mes/año o usar actuales
+        // 1. Obtener parámetros de mes/año (0-indexed month)
         const { month, year } = req.query;
         const now = new Date();
         const currentMonth = month ? parseInt(month as string, 10) : now.getMonth();
         const currentYear = year ? parseInt(year as string, 10) : now.getFullYear();
 
-        // Filtrar transacciones del mes
-        const monthlyTransactions = transactions.filter(t => {
-            const tDate = new Date(t.date);
-            return tDate.getMonth() === currentMonth && tDate.getFullYear() === currentYear;
-        });
+        // Formato `YYYY-MM-`
+        const monthStr = String(currentMonth + 1).padStart(2, '0');
+        const yearStr = String(currentYear);
+        const datePrefix = `${yearStr}-${monthStr}-`;
 
-        // 4. Calcular ingresos y gastos mensuales
-        const monthlyIncome = monthlyTransactions
-            .filter(t => t.type === 'income')
-            .reduce((sum, t) => sum + t.amount, 0);
+        // 2. Ejecutar consultas Prisma en PARALELO para exprimir la BD
+        const [accounts, monthlyIncomes, monthlyExpenses, recentTransactions] = await Promise.all([
+            AccountModel.findAllByUserId(userId),
+            
+            prisma.transaction.aggregate({
+                _sum: { amount: true },
+                where: { userId, type: 'income', date: { startsWith: datePrefix } }
+            }),
+            
+            prisma.transaction.aggregate({
+                _sum: { amount: true },
+                where: { userId, type: 'expense', date: { startsWith: datePrefix } }
+            }),
 
-        const monthlyExpense = monthlyTransactions
-            .filter(t => t.type === 'expense')
-            .reduce((sum, t) => sum + t.amount, 0);
+            prisma.transaction.findMany({
+                where: { userId },
+                orderBy: { date: 'desc' },
+                take: 5
+            })
+        ]);
 
-        // 5. Devolver listado (ej. últimas 5 transacciones)
-        // Ya están ordenadas de más recientes a viejas según findAllByUserId en Prisma
-        const recentTransactions = transactions.slice(0, 5);
+        const totalBalance = accounts.reduce((sum, account) => sum + account.balance, 0);
+        const monthlyIncome = monthlyIncomes._sum.amount || 0;
+        const monthlyExpense = monthlyExpenses._sum.amount || 0;
 
         res.json({
             totalBalance,
