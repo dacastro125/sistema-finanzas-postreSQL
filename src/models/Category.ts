@@ -10,6 +10,9 @@ const defaultCategories = [
     { name: 'Transporte', type: 'expense', color: '#2196F3' },
     { name: 'Entretenimiento', type: 'expense', color: '#E91E63' },
     { name: 'Servicios', type: 'expense', color: '#9C27B0' },
+    { name: 'Gasolina', type: 'expense', color: '#607D8B' }, // Azul grisáceo
+    { name: '4x1000', type: 'expense', color: '#795548' },    // Café (impuestos compartidos)
+    { name: 'Otros', type: 'expense', color: '#9E9E9E' }       // Gris neutro
 ];
 
 export const CategoryModel = {
