@@ -282,7 +282,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const amount = document.getElementById('txAmount').value;
         const accountId = document.getElementById('txAccount').value;
         const categoryId = document.getElementById('txCategory').value === 'transfer_cat' ? window._categories[0].id : document.getElementById('txCategory').value; // fallback category if transfer
-        const date = new Date(document.getElementById('txDate').value).toISOString();
+        const dateValue = document.getElementById('txDate').value;
+        const date = `${dateValue}T00:00:00.000Z`;
         const note = document.getElementById('txNote').value;
         const targetAccountId = document.getElementById('txTargetAccount').value;
 
