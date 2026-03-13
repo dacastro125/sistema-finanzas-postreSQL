@@ -30,6 +30,77 @@
             flex: 1;
             min-width: 300px;
         }
+
+        /* === Import Modal Styles === */
+        .import-step { display: none; }
+        .import-step.active { display: block; }
+
+        .bank-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+            gap: 0.75rem;
+            margin-top: 0.5rem;
+        }
+        .bank-card {
+            border: 2px solid var(--surface-border);
+            border-radius: 0.75rem;
+            padding: 0.75rem 0.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: var(--bg);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        .bank-card:hover { border-color: var(--primary); color: var(--primary); }
+        .bank-card.selected { border-color: var(--primary); background: rgba(99,102,241,0.15); color: var(--primary); }
+        .bank-card i { display: block; font-size: 1.5rem; margin-bottom: 0.4rem; }
+
+        .drop-zone {
+            border: 2px dashed var(--surface-border);
+            border-radius: 0.75rem;
+            padding: 2rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            margin-top: 1rem;
+            color: var(--text-muted);
+        }
+        .drop-zone:hover, .drop-zone.drag-over { border-color: var(--primary); color: var(--primary); }
+        .drop-zone i { font-size: 2.5rem; margin-bottom: 0.5rem; display: block; }
+
+        .preview-table-wrap { max-height: 280px; overflow-y: auto; margin-top: 1rem; }
+        .preview-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+        .preview-table th { background: var(--surface-border); padding: 0.5rem; text-align: left; }
+        .preview-table td { padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--surface-border); }
+        .preview-table tr.row-skip { opacity: 0.4; }
+        .preview-table .tag-income { color: #10b981; font-weight: 600; }
+        .preview-table .tag-expense { color: #ef4444; font-weight: 600; }
+
+        .step-indicator {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .step-dot {
+            width: 24px; height: 24px;
+            border-radius: 50%;
+            background: var(--surface-border);
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 600; font-size: 0.75rem;
+        }
+        .step-dot.active { background: var(--primary); color: white; }
+        .step-line { flex: 1; height: 2px; background: var(--surface-border); }
+        .col-map-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin: 0.75rem 0;
+        }
     </style>
 </head>
 
@@ -77,6 +148,9 @@
                 <div style="display:flex; gap: 1rem;">
                     <button class="btn" id="newTransactionBtn" style="width: auto;">
                         <i class="fas fa-plus"></i> Nueva Transacción
+                    </button>
+                    <button class="btn" id="importExtractBtn" style="width: auto; background: linear-gradient(135deg, #0ea5e9, #6366f1);">
+                        <i class="fas fa-file-upload"></i> Importar Extracto
                     </button>
                 </div>
             </header>
@@ -173,6 +247,97 @@
     </div>
 
     <script src="./js/transactions.js"></script>
+    <script src="./js/import_extractor.js"></script>
 </body>
 
-</html>
+<!-- ===== MODAL IMPORTAR EXTRACTO BANCARIO ===== -->
+<div class="modal-overlay" id="importModal">
+    <div class="modal-content" style="max-width: 720px; max-height: 90vh; overflow-y: auto;">
+        <div class="modal-header">
+            <h3 class="modal-title"><i class="fas fa-file-upload" style="color: var(--primary); margin-right: 0.5rem;"></i>Importar Extracto Bancario</h3>
+            <button class="modal-close" id="closeImportModal"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="step-indicator">
+                <div class="step-dot active" id="stepDot1">1</div>
+                <div class="step-line"></div>
+                <div class="step-dot" id="stepDot2">2</div>
+                <span style="margin-left: 0.25rem;" id="stepLabel">Seleccionar Banco y Archivo</span>
+            </div>
+
+            <!-- STEP 1 -->
+            <div class="import-step active" id="importStep1">
+                <p style="color: var(--text-muted); margin-bottom: 1rem; font-size: 0.9rem;">Seleccione su banco. El sistema mapeará las columnas del CSV automáticamente. Si su banco no aparece, use "Manual".</p>
+                <div class="bank-grid">
+                    <div class="bank-card" data-bank="bancolombia"><i class="fas fa-university"></i>Bancolombia</div>
+                    <div class="bank-card" data-bank="davivienda"><i class="fas fa-piggy-bank"></i>Davivienda</div>
+                    <div class="bank-card" data-bank="nequi"><i class="fas fa-mobile-alt"></i>Nequi</div>
+                    <div class="bank-card" data-bank="bogota"><i class="fas fa-landmark"></i>Bco. de Bogotá</div>
+                    <div class="bank-card" data-bank="bbva"><i class="fas fa-globe"></i>BBVA</div>
+                    <div class="bank-card" data-bank="manual"><i class="fas fa-sliders-h"></i>Manual</div>
+                </div>
+
+                <div id="manualMapSection" style="display:none; margin-top: 1rem; background: var(--bg); border-radius: 0.75rem; padding: 1rem; border: 1px solid var(--surface-border);">
+                    <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;"><i class="fas fa-info-circle"></i> Ingrese los nombres exactos de las columnas en el CSV.</p>
+                    <div class="col-map-grid">
+                        <div class="form-group"><label style="font-size:0.8rem;">Columna Fecha</label><input type="text" id="manualColFecha" class="form-control" placeholder="ej: FECHA"></div>
+                        <div class="form-group"><label style="font-size:0.8rem;">Columna Descripción</label><input type="text" id="manualColDesc" class="form-control" placeholder="ej: DESCRIPCION"></div>
+                        <div class="form-group"><label style="font-size:0.8rem;">Columna Monto (único)</label><input type="text" id="manualColMonto" class="form-control" placeholder="ej: VALOR"></div>
+                        <div class="form-group">
+                            <label style="font-size:0.8rem;">O Débito / Crédito (separados)</label>
+                            <div style="display:flex; gap: 0.5rem;">
+                                <input type="text" id="manualColDebito" class="form-control" placeholder="DÉBITO">
+                                <input type="text" id="manualColCredito" class="form-control" placeholder="CRÉDITO">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="drop-zone" id="dropZone">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <strong>Arrastra tu archivo CSV aquí</strong>
+                    <p style="font-size: 0.82rem; margin-top: 0.3rem;">o haz clic para seleccionarlo</p>
+                    <p id="fileNameLabel" style="font-size: 0.8rem; color: var(--primary); margin-top: 0.5rem;"></p>
+                    <input type="file" id="csvFileInput" accept=".csv,.txt" style="display:none;">
+                </div>
+
+                <div style="margin-top: 1.25rem; display: flex; justify-content: flex-end;">
+                    <button class="btn" id="goToStep2Btn" disabled style="width: auto; opacity: 0.5;">Siguiente <i class="fas fa-arrow-right"></i></button>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div class="import-step" id="importStep2">
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label><i class="fas fa-wallet" style="color: var(--primary);"></i> Cuenta destino</label>
+                    <select id="importAccountSelect" class="form-control"></select>
+                </div>
+                <div class="form-group" style="margin-bottom: 1rem;">
+                    <label><i class="fas fa-tag" style="color: var(--primary);"></i> Categoría para todas</label>
+                    <select id="importCategorySelect" class="form-control"></select>
+                </div>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Deselecciona las filas que no quieres importar:</p>
+                <div class="preview-table-wrap">
+                    <table class="preview-table">
+                        <thead>
+                            <tr>
+                                <th style="width:30px;"><input type="checkbox" id="selectAllRows" checked></th>
+                                <th>Fecha</th>
+                                <th>Descripción</th>
+                                <th>Tipo</th>
+                                <th>Monto</th>
+                            </tr>
+                        </thead>
+                        <tbody id="previewTableBody"></tbody>
+                    </table>
+                </div>
+                <div style="margin-top: 1.25rem; display: flex; gap: 1rem; justify-content: space-between; align-items: center;">
+                    <button class="btn" id="backToStep1Btn" style="width: auto; background: var(--surface-border);"><i class="fas fa-arrow-left"></i> Atrás</button>
+                    <button class="btn btn-primary" id="confirmImportBtn" style="width: auto;"><i class="fas fa-check"></i> Importar <span id="importCountLabel">0</span> transacciones</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</html>

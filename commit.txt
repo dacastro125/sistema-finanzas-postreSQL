@@ -1,1 +1,1 @@
-perf: db query aggregation and payload compression
+feat: bank statement CSV importer with multi-bank support

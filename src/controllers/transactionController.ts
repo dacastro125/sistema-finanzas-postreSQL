@@ -122,3 +122,54 @@ export const updateTransaction = async (req: AuthRequest, res: Response): Promis
         res.status(400).json({ error: error.message });
     }
 };
+
+// -------------------------------------------------------------------
+// Importación masiva desde extracto bancario
+// Recibe: { accountId, categoryId, transactions: [{date, amount, type, note}] }
+// -------------------------------------------------------------------
+export const bulkCreateTransactions = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user!.id;
+        const { accountId, categoryId, transactions } = req.body;
+
+        if (!accountId || !categoryId || !Array.isArray(transactions) || transactions.length === 0) {
+            res.status(400).json({ error: 'Faltan campos requeridos (accountId, categoryId, transactions[])' });
+            return;
+        }
+
+        // Verificar que la cuenta pertenece al usuario
+        const account = await AccountModel.findFirstSafe(accountId, userId);
+        if (!account) {
+            res.status(404).json({ error: 'Cuenta no encontrada' });
+            return;
+        }
+
+        let balanceChange = 0;
+        const dataToInsert = transactions.map((tx: any) => {
+            const amount = Math.abs(Number(tx.amount));
+            const type = tx.type as 'income' | 'expense';
+            balanceChange += type === 'income' ? amount : -amount;
+            return {
+                userId,
+                accountId,
+                categoryId,
+                amount,
+                type,
+                date: tx.date,
+                note: tx.note || null,
+            };
+        });
+
+        const { prisma } = await import('../utils/prisma');
+        await prisma.transaction.createMany({ data: dataToInsert });
+
+        // Actualizar balance de la cuenta
+        await AccountModel.updateBalance(accountId, balanceChange);
+
+        res.status(201).json({ message: `${dataToInsert.length} transacciones importadas exitosamente.` });
+    } catch (error: any) {
+        console.error('Bulk import error:', error);
+        res.status(500).json({ error: 'Error al importar las transacciones.' });
+    }
+};
+
