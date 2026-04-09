@@ -34,4 +34,19 @@ app.use('/api/credits', creditRoutes);
 
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
+
+    // ─── Self-ping para evitar el cold start en Render ─────────────────────
+    // Render duerme tras 15 min de inactividad. Nos pingamos cada 4 min.
+    if (process.env.NODE_ENV === 'production') {
+        const appUrl = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+        setInterval(async () => {
+            try {
+                const res = await fetch(`${appUrl}/api/health`);
+                console.log(`[keep-alive] ping → ${res.status}`);
+            } catch (err: any) {
+                console.warn(`[keep-alive] ping failed: ${err.message}`);
+            }
+        }, 4 * 60 * 1000); // cada 4 minutos
+        console.log(`[keep-alive] self-ping activo → ${appUrl}/api/health`);
+    }
 });

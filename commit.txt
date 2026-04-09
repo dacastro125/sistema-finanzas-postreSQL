@@ -1,1 +1,1 @@
-fix: move import modal inside body, add Nu bank template
+fix: add retry logic to spa loadScript for 502 cold start resilience
