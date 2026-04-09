@@ -69,17 +69,25 @@
         });
     }
 
-    // ─── Load a script tag dynamically ────────────────────────────────────────
-    function loadScript(src) {
+    // ─── Load a script tag dynamically (con reintentos) ──────────────────────
+    function loadScript(src, attempt = 0) {
         return new Promise((resolve, reject) => {
-            // Quitar script anterior para re-ejecutar en nuevo contexto
             const existing = document.querySelector(`script[src^="${src}"]`);
             if (existing) existing.remove();
 
             const s = document.createElement('script');
             s.src = src + '?_t=' + Date.now();
             s.onload = resolve;
-            s.onerror = () => reject(new Error(`Error cargando script: ${src}`));
+            s.onerror = () => {
+                if (attempt < 3) {
+                    // Reintento tras 2s (da tiempo al servidor a despertar)
+                    setTimeout(() => {
+                        loadScript(src, attempt + 1).then(resolve).catch(reject);
+                    }, 2000);
+                } else {
+                    reject(new Error(`Error cargando script: ${src}`));
+                }
+            };
             document.body.appendChild(s);
         });
     }
