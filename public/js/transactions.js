@@ -1,19 +1,6 @@
-document.addEventListener('DOMContentLoaded', () => {
+window.initPage_transactions = function() {
     const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = 'index.html';
-        return;
-    }
-
-    const userName = localStorage.getItem('userName');
-    if (userName) document.getElementById('userProfileName').textContent = `Hola, ${userName}`;
-
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-        localStorage.removeItem('token');
-        localStorage.removeItem('userName');
-        window.location.href = 'index.html';
-    });
+    if (!token) { window.location.href = '/index.html'; return; }
 
     // Elements
     const txTableBody = document.getElementById('txTableBody');
@@ -334,4 +321,4 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     loadTransactions();
-});
+};

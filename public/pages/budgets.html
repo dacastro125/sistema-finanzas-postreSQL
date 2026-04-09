@@ -1,0 +1,98 @@
+<style>
+    .budget-card {
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        transition: transform 0.2s;
+    }
+    .budget-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    .budget-title {
+        font-size: 1.1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .budget-color-indicator {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .budget-actions button {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: color 0.2s;
+        margin-left: 0.5rem;
+    }
+    .budget-actions button:hover { color: white; }
+    .progress-container {
+        width: 100%;
+        height: 8px;
+        background-color: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        overflow: hidden;
+        margin-bottom: 0.5rem;
+    }
+    .progress-bar {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+    .progress-stats {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+    .budget-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1.5rem;
+    }
+</style>
+
+<main class="main-content">
+    <header class="header-top">
+        <div>
+            <h2>Control de Presupuestos</h2>
+            <p style="color: var(--text-muted); margin-top: 0.5rem;">Vigila tus límites de gasto mensual por categoría.</p>
+        </div>
+    </header>
+
+    <div id="budgetsContainer" class="budget-grid">
+        <!-- JS Inject here -->
+    </div>
+</main>
+
+<!-- Modal Setting Budget -->
+<div class="modal-overlay" id="budgetModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Establecer Presupuesto</h3>
+            <button class="modal-close" id="closeBudgetModal"><i class="fas fa-times"></i></button>
+        </div>
+        <form id="budgetForm">
+            <input type="hidden" id="budgetCategId">
+            <div class="form-group">
+                <label>Categoría</label>
+                <input type="text" id="budgetCategName" class="form-control" disabled style="background: rgba(255,255,255,0.05);">
+            </div>
+            <div class="form-group">
+                <label>Límite Mensual ($) - Pon 0 para deshabilitar</label>
+                <input type="number" step="0.01" id="budgetLimitAmount" class="form-control" required>
+            </div>
+            <button type="submit" class="btn">Guardar Presupuesto</button>
+        </form>
+    </div>
+</div>

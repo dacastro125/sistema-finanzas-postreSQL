@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Check if already logged in
     const token = localStorage.getItem('token');
     if (token) {
-        window.location.href = '/dashboard.html';
+        window.location.href = '/app.html';
     }
 
     const loginCard = document.getElementById('loginCard');
@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('user', JSON.stringify(data.user));
 
             // Redirect
-            window.location.href = '/dashboard.html';
+            window.location.href = '/app.html';
         } catch (error) {
             loginAlert.textContent = error.message;
             loginAlert.classList.remove('hidden');
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('token', loginData.token);
             localStorage.setItem('user', JSON.stringify(loginData.user));
 
-            window.location.href = '/dashboard.html';
+            window.location.href = '/app.html';
 
         } catch (error) {
             registerAlert.textContent = error.message;

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanzasOS</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js (cargado una sola vez para toda la app) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
+    <!-- Estilos globales -->
+    <link rel="stylesheet" href="./css/style.css">
+    <style>
+        /* Spinner de carga para navegación SPA */
+        #spa-loader {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), #0ea5e9);
+            z-index: 9999;
+            animation: spa-slide 0.6s ease-out forwards;
+        }
+        @keyframes spa-slide {
+            from { width: 0; opacity: 1; }
+            to   { width: 100%; opacity: 0.8; }
+        }
+        #page-content {
+            display: contents;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Barra de progreso de carga -->
+    <div id="spa-loader"></div>
+
+    <div class="dashboard-layout">
+        <!-- Sidebar (persistente, nunca se recarga) -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-wallet" style="color: var(--primary)"></i> FinanzasOS
+            </div>
+
+            <nav>
+                <a href="#" class="nav-link" data-view="dashboard" id="nav-dashboard">
+                    <i class="fas fa-th-large"></i> Dashboard
+                </a>
+                <a href="#" class="nav-link" data-view="budgets" id="nav-budgets">
+                    <i class="fas fa-bullseye"></i> Presupuestos
+                </a>
+                <a href="#" class="nav-link" data-view="accounts" id="nav-accounts">
+                    <i class="fas fa-credit-card"></i> Cuentas
+                </a>
+                <a href="#" class="nav-link" data-view="transactions" id="nav-transactions">
+                    <i class="fas fa-exchange-alt"></i> Transacciones
+                </a>
+                <a href="#" class="nav-link" data-view="loans" id="nav-loans">
+                    <i class="fas fa-calculator"></i> Calculadora Amort.
+                </a>
+                <a href="#" class="nav-link" data-view="credits" id="nav-credits">
+                    <i class="fas fa-list"></i> Lista de Préstamos
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div id="userProfileName" style="color: white; margin-bottom: 1rem; font-weight:500;"></div>
+                <a href="#" class="nav-link" id="logoutBtn" style="color: var(--danger)">
+                    <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                </a>
+            </div>
+        </aside>
+
+        <!-- Área de contenido dinámica (aquí se inyectan los fragmentos) -->
+        <div id="page-content">
+            <!-- El contenido se carga dinámicamente por spa.js -->
+        </div>
+    </div>
+
+    <!-- Router SPA -->
+    <script src="./js/spa.js"></script>
+</body>
+
+</html>

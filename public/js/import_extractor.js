@@ -9,7 +9,7 @@
     const BANK_TEMPLATES = {
         bancolombia: { date: 'FECHA', desc: 'DESCRIPCION', amount: 'VALOR', debit: null, credit: null, delimiter: ';', typeCol: 'TIPO DE MOVIMIENTO', debitWord: 'DEBITO' },
         davivienda:  { date: 'FECHA', desc: 'DESCRIPCIÓN', amount: null, debit: 'DÉBITO', credit: 'CRÉDITO', delimiter: ';', typeCol: null, debitWord: null },
-        nequi:       { date: 'Fecha', desc: 'Descripción', amount: 'Monto', debit: null, credit: null, delimiter: ',', typeCol: null, debitWord: null },
+        nequi:       { date: 'Fecha', desc: 'Descripcion', amount: 'Valor', debit: null, credit: null, delimiter: ',', typeCol: null, debitWord: null },
         nu:          { date: 'Fecha del movimiento', desc: 'Descripción', amount: 'Valor', debit: null, credit: null, delimiter: ',', typeCol: null, debitWord: null },
         bogota:      { date: 'Fecha', desc: 'Descripción', amount: 'Valor', debit: null, credit: null, delimiter: ';', typeCol: 'Tipo', debitWord: 'DEBITO' },
         bbva:        { date: 'FECHA', desc: 'CONCEPTO', amount: 'IMPORTE', debit: null, credit: null, delimiter: ';', typeCol: null, debitWord: null },

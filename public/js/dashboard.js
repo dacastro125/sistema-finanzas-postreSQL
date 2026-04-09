@@ -1,14 +1,6 @@
-document.addEventListener('DOMContentLoaded', () => {
+window.initPage_dashboard = function() {
     const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
-
-    if (!token || !userStr) {
-        window.location.href = '/index.html';
-        return;
-    }
-
-    const user = JSON.parse(userStr);
-    document.getElementById('userProfileName').textContent = `Hola, ${user.name.split(' ')[0]}`;
+    if (!token) { window.location.href = '/index.html'; return; }
 
     // Elements
     const totalBalanceEl = document.getElementById('totalBalance');
@@ -239,12 +231,10 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/index.html';
     };
 
-    logoutBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        logout();
-    });
+    // Expose for modals.js post-save refresh
+    window.loadDashboardData = loadDashboardData;
 
     // Initialize
     initFilters();
     loadDashboardData();
-});
+};

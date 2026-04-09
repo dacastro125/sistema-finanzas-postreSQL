@@ -1,0 +1,108 @@
+<style>
+    .credit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+    .credit-card {
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .credit-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        cursor: pointer;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--surface-border);
+    }
+    .credit-card-title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    .credit-card-stats {
+        display: flex;
+        gap: 2rem;
+        margin-top: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    .stat-box {
+        background: rgba(15, 23, 42, 0.5);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        flex: 1;
+        text-align: center;
+    }
+    .stat-box p {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+    .stat-box h4 { font-size: 1.1rem; color: white; }
+    .credit-body {
+        display: none;
+        margin-top: 1rem;
+    }
+    .credit-body.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-5px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .installment-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.9rem;
+    }
+    .installment-table th, .installment-table td {
+        padding: 0.75rem 1rem;
+        border-bottom: 1px solid var(--surface-border);
+        text-align: center;
+    }
+    .installment-table th { color: var(--text-muted); font-weight: 600; }
+    .status-badge {
+        padding: 0.25rem 0.5rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+    .status-pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .status-paid { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+    .pay-btn {
+        background: var(--primary);
+        color: white;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 0.25rem;
+        cursor: pointer;
+        transition: 0.2s;
+        font-size: 0.85rem;
+    }
+    .pay-btn:hover { opacity: 0.9; }
+    .pay-btn:disabled { background: var(--surface-border); color: var(--text-muted); cursor: not-allowed; }
+</style>
+
+<main class="main-content">
+    <header class="credit-header">
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <h2>Lista de Préstamos</h2>
+        </div>
+        <button class="btn btn-primary" id="goToLoansBtn" style="width: auto; text-decoration: none;">
+            <i class="fas fa-plus"></i> Simular Nuevo
+        </button>
+    </header>
+
+    <div id="creditsList" class="animate-fade-in">
+        <!-- Los créditos se renderizarán aquí -->
+    </div>
+</main>

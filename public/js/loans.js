@@ -1,20 +1,6 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Auth Check
+window.initPage_loans = function() {
     const token = localStorage.getItem('token');
-    if (!token) {
-        window.location.href = 'index.html';
-        return;
-    }
-
-    const userName = localStorage.getItem('userName');
-    if (userName) document.getElementById('userProfileName').textContent = `Hola, ${userName}`;
-
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-        localStorage.removeItem('token');
-        localStorage.removeItem('userName');
-        window.location.href = 'index.html';
-    });
+    if (!token) { window.location.href = '/index.html'; return; }
 
     // Elements
     const loanForm = document.getElementById('loanForm');
@@ -163,8 +149,12 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             if (response.ok) {
-                // Success! Redirect directly to credits overview
-                window.location.href = 'credits.html';
+                // Navigate to credits via SPA
+                if (window.spaNavigate) {
+                    window.spaNavigate('credits');
+                } else {
+                    window.location.href = 'credits.html';
+                }
             } else {
                 const data = await response.json();
                 alert(data.error || 'Error al guardar el crédito');
@@ -174,4 +164,4 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Error de conectividad al guardar el crédito.');
         }
     });
-});
+};

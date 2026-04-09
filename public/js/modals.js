@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+window.initPage_dashboard_modals = function() {
     // ------------------------------------
     // Context
     // ------------------------------------
@@ -272,7 +272,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
         accountModal.classList.remove('active');
         document.getElementById('accountForm').reset();
-        window.location.reload(); // Refresh dashboard
+        // SPA-safe refresh: reload dashboard data instead of full page reload
+        if (typeof window.loadDashboardData === 'function') {
+            window.loadDashboardData();
+        }
     });
 
     document.getElementById('txForm').addEventListener('submit', async (e) => {
@@ -320,10 +323,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
             txModal.classList.remove('active');
             resetTxFormState();
-            window.location.reload(); // Refresh dashboard
+            // SPA-safe refresh: reload dashboard data instead of full page reload
+            if (typeof window.loadDashboardData === 'function') {
+                window.loadDashboardData();
+            }
         } catch (error) {
             console.error('Save tx error:', error);
             alert('Error de conexión al servidor al guardar la transacción.');
         }
     });
-});
+};

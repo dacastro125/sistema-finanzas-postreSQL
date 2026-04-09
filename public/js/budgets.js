@@ -1,14 +1,7 @@
-document.addEventListener('DOMContentLoaded', () => {
+window.initPage_budgets = function() {
     const token = localStorage.getItem('token');
-    const userStr = localStorage.getItem('user');
+    if (!token) { window.location.href = '/index.html'; return; }
 
-    if (!token || !userStr) {
-        window.location.href = '/index.html';
-        return;
-    }
-
-    const user = JSON.parse(userStr);
-    document.getElementById('userProfileName').textContent = `Hola, ${user.name.split(' ')[0]}`;
 
     const budgetsContainer = document.getElementById('budgetsContainer');
     const budgetModal = document.getElementById('budgetModal');
@@ -129,16 +122,5 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = '/index.html';
     };
 
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-        logout();
-    });
-
-    // Enlazar link de sidebar de dashboard actual -> budgets
-    const dashLink = document.getElementById('nav-dashboard');
-    if (dashLink) {
-        dashLink.href = '/dashboard.html';
-    }
-
     loadBudgets();
-});
+};
