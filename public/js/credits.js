@@ -97,7 +97,7 @@ window.initPage_credits = function() {
                                         <td style="font-weight: bold;">${formatter.format(cuota.totalInstallment)}</td>
                                         <td>
                                             <span class="status-badge ${isPaid ? 'status-paid' : 'status-pending'}">
-                                                ${isPaid ? 'Pagada' : 'Pendiente'}
+                                                ${isPaid ? (cuota.amountPaid ? `Pagada (${formatter.format(cuota.amountPaid)})` : 'Pagada') : 'Pendiente'}
                                             </span>
                                         </td>
                                         <td>

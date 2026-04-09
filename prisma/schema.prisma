@@ -91,5 +91,6 @@ model Installment {
   totalInstallment  Float
   finalBalance      Float
   status            String  // "pending" or "paid"
+  amountPaid        Float?  @default(0)
   credit            Credit  @relation(fields: [creditId], references: [id], onDelete: Cascade)
 }

@@ -51,7 +51,7 @@ export const CreditModel = {
         return newCredit as any;
     },
 
-    payInstallment: async (creditId: string, userId: string, installmentNumber: number): Promise<Credit> => {
+    payInstallment: async (creditId: string, userId: string, installmentNumber: number, payAmount?: number): Promise<Credit> => {
         const credit = await prisma.credit.findFirst({
             where: { id: creditId, userId }
         });
@@ -67,7 +67,10 @@ export const CreditModel = {
 
         await prisma.installment.update({
             where: { id: installment.id },
-            data: { status: 'paid' }
+            data: { 
+                status: 'paid',
+                amountPaid: payAmount || installment.totalInstallment 
+            }
         });
 
         const updatedCredit = await prisma.credit.findUnique({
