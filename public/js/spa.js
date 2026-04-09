@@ -1,33 +1,22 @@
 /**
  * spa.js — Router de Single Page Application para FinanzasOS
- * 
- * Cómo funciona:
- * 1. Intercepta clics en los nav-link del sidebar
- * 2. Hace fetch del fragmento HTML de la sección (public/pages/<view>.html)
- * 3. Inyecta el HTML en #page-content
- * 4. Carga dinámicamente el script JS de esa sección y llama window.initPage_<view>()
- * 5. Actualiza la URL con history.pushState (?view=<name>)
- * 6. Maneja el botón Atrás/Adelante del navegador
  */
 
 (function () {
-    // Mapa: nombre de vista → script(s) JS a cargar
+    // Mapa: nombre de vista → script(s) JS a cargar (rutas absolutas)
     const PAGE_SCRIPTS = {
-        dashboard:    ['./js/dashboard.js', './js/modals.js'],
-        transactions: ['./js/transactions.js', './js/import_extractor.js'],
-        accounts:     ['./js/accounts.js'],
-        budgets:      ['./js/budgets.js'],
-        loans:        ['./js/loans.js'],
-        credits:      ['./js/credits.js'],
+        dashboard:    ['/js/dashboard.js', '/js/modals.js'],
+        transactions: ['/js/transactions.js', '/js/import_extractor.js'],
+        accounts:     ['/js/accounts.js'],
+        budgets:      ['/js/budgets.js'],
+        loans:        ['/js/loans.js'],
+        credits:      ['/js/credits.js'],
     };
 
-    // Scripts ya cargados (evita duplicados en el DOM)
-    const loadedScripts = new Set();
-
-    // Script actualmente en ejecución (para limpieza)
     let currentView = null;
+    let hasError = false;
 
-    // Exponer spaNavigate globalmente para que scripts puedan navegar
+    // Exponer spaNavigate globalmente
     window.spaNavigate = (view) => navigateTo(view);
 
     // ─── Auth check ───────────────────────────────────────────────────────────
@@ -47,23 +36,28 @@
     } catch (_) {}
 
     // ─── Logout ───────────────────────────────────────────────────────────────
-    document.getElementById('logoutBtn').addEventListener('click', (e) => {
-        e.preventDefault();
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-        localStorage.removeItem('userName');
-        window.location.href = '/index.html';
-    });
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('userName');
+            window.location.href = '/index.html';
+        });
+    }
 
     // ─── Loader bar ───────────────────────────────────────────────────────────
     const loader = document.getElementById('spa-loader');
     function showLoader() {
+        if (!loader) return;
         loader.style.display = 'block';
         loader.style.animation = 'none';
-        loader.offsetHeight; // reflow
+        loader.offsetHeight;
         loader.style.animation = 'spa-slide 0.6s ease-out forwards';
     }
     function hideLoader() {
+        if (!loader) return;
         loader.style.display = 'none';
     }
 
@@ -77,14 +71,14 @@
     // ─── Load a script tag dynamically ────────────────────────────────────────
     function loadScript(src) {
         return new Promise((resolve, reject) => {
-            // Si ya existe en el DOM, removemos para re-ejecutar con el nuevo contexto
-            const existing = document.querySelector(`script[src="${src}"]`);
+            // Quitar script anterior para re-ejecutar en nuevo contexto
+            const existing = document.querySelector(`script[src^="${src}"]`);
             if (existing) existing.remove();
 
             const s = document.createElement('script');
-            s.src = src + '?_t=' + Date.now(); // cache-bust
+            s.src = src + '?_t=' + Date.now();
             s.onload = resolve;
-            s.onerror = reject;
+            s.onerror = () => reject(new Error(`Error cargando script: ${src}`));
             document.body.appendChild(s);
         });
     }
@@ -92,19 +86,23 @@
     // ─── Main navigate function ───────────────────────────────────────────────
     async function navigateTo(view, pushState = true) {
         if (!PAGE_SCRIPTS[view]) view = 'dashboard';
-        if (currentView === view) return; // ya estamos aquí
+
+        // Solo bloquear si ya estamos aquí Y no hubo error previo
+        if (currentView === view && !hasError) return;
 
         showLoader();
         setActiveNav(view);
+        hasError = false;
 
         try {
-            // 1. Fetch del fragmento HTML
-            const res = await fetch(`./pages/${view}.html?_t=${Date.now()}`);
-            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            // 1. Fetch del fragmento HTML con ruta absoluta
+            const res = await fetch(`/pages/${view}.html?_t=${Date.now()}`);
+            if (!res.ok) throw new Error(`HTTP ${res.status} al cargar /pages/${view}.html`);
             const html = await res.text();
 
             // 2. Inyectar en el área de contenido
             const container = document.getElementById('page-content');
+            if (!container) throw new Error('No se encontró #page-content');
             container.innerHTML = html;
 
             // 3. Actualizar URL
@@ -114,7 +112,7 @@
 
             currentView = view;
 
-            // 4. Cargar scripts de la página y llamar init
+            // 4. Cargar scripts de la página secuencialmente
             const scripts = PAGE_SCRIPTS[view];
             for (const src of scripts) {
                 await loadScript(src);
@@ -125,12 +123,13 @@
             if (typeof initFn === 'function') {
                 initFn();
             }
-            // Dashboard también requiere inicializar los modales
+
+            // Dashboard también requiere inicializar modales
             if (view === 'dashboard' && typeof window.initPage_dashboard_modals === 'function') {
                 window.initPage_dashboard_modals();
             }
 
-            // 6. Si la página credits tiene botón "Simular Nuevo", conectarlo
+            // Credits: conectar botón de navegar a loans
             if (view === 'credits') {
                 const goBtn = document.getElementById('goToLoansBtn');
                 if (goBtn) {
@@ -140,14 +139,22 @@
 
         } catch (err) {
             console.error(`[SPA] Error cargando vista "${view}":`, err);
-            document.getElementById('page-content').innerHTML = `
+            hasError = true;
+            currentView = null; // permitir reintento
+            const container = document.getElementById('page-content');
+            if (container) {
+                container.innerHTML = `
                 <main class="main-content">
                     <div style="padding: 2rem; text-align: center; color: var(--danger);">
                         <i class="fas fa-exclamation-triangle" style="font-size: 2rem; margin-bottom: 1rem;"></i>
                         <h3>Error al cargar la sección</h3>
-                        <p style="color: var(--text-muted);">Intenta de nuevo o recarga la página.</p>
+                        <p style="color: var(--text-muted); margin-bottom: 1rem;">Intenta de nuevo o recarga la página.</p>
+                        <button class="btn" onclick="window.spaNavigate('${view}')" style="width:auto;">
+                            <i class="fas fa-redo"></i> Reintentar
+                        </button>
                     </div>
                 </main>`;
+            }
         } finally {
             hideLoader();
         }
@@ -178,7 +185,6 @@
     // ─── Arrancar ─────────────────────────────────────────────────────────────
     const initialView = getViewFromURL();
     navigateTo(initialView, false);
-    // Reemplazar la entrada de history para que el estado inicial sea correcto
     history.replaceState({ view: initialView }, '', `?view=${initialView}`);
 
 })();
