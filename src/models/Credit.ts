@@ -65,13 +65,89 @@ export const CreditModel = {
         if (!installment) throw new Error('Cuota no encontrada');
         if (installment.status === 'paid') throw new Error('La cuota ya está pagada');
 
-        await prisma.installment.update({
-            where: { id: installment.id },
-            data: { 
-                status: 'paid',
-                amountPaid: payAmount || installment.totalInstallment 
+        const oldAmountPaid = installment.amountPaid || 0;
+        const currentPayAmount = payAmount || (installment.totalInstallment - oldAmountPaid);
+        const newAmountPaid = oldAmountPaid + currentPayAmount;
+        
+        if (newAmountPaid < installment.totalInstallment) {
+            // Pago parcial: se actualiza el monto pagado pero sigue pendiente
+            await prisma.installment.update({
+                where: { id: installment.id },
+                data: { amountPaid: newAmountPaid, status: 'pending' }
+            });
+        } else {
+            // Pago completo o abono a capital (exceso)
+            const excess = newAmountPaid - installment.totalInstallment;
+            const newFinalBalance = Math.max(0, installment.finalBalance - excess);
+
+            await prisma.installment.update({
+                where: { id: installment.id },
+                data: { 
+                    status: 'paid',
+                    amountPaid: newAmountPaid,
+                    finalBalance: newFinalBalance,
+                    // Si pagó de más, sumamos ese exceso a la amortización de esta cuota
+                    amortization: installment.amortization + excess
+                }
+            });
+
+            if (excess > 0) {
+                // Re-amortización de las cuotas pendientes
+                const pendingFuture = await prisma.installment.findMany({
+                    where: { creditId, installmentNumber: { gt: installmentNumber } },
+                    orderBy: { installmentNumber: 'asc' }
+                });
+
+                if (pendingFuture.length > 0) {
+                    if (newFinalBalance <= 0) {
+                        // Deuda saldada, borrar cuotas futuras
+                        await prisma.installment.deleteMany({
+                            where: { creditId, installmentNumber: { gt: installmentNumber } }
+                        });
+                    } else {
+                        // Recalcular cuotas
+                        let rateMonthly = (credit.rateType === 'anual') ? (credit.interestRate / 100 / 12) : (credit.interestRate / 100);
+                        let remainingTerm = pendingFuture.length;
+                        
+                        let newCuota = 0;
+                        if (rateMonthly === 0) {
+                            newCuota = newFinalBalance / remainingTerm;
+                        } else {
+                            newCuota = newFinalBalance * (rateMonthly * Math.pow(1 + rateMonthly, remainingTerm)) / (Math.pow(1 + rateMonthly, remainingTerm) - 1);
+                        }
+
+                        let saldo = newFinalBalance;
+
+                        // Se utiliza una serie de updates secuenciales
+                        for (let i = 0; i < pendingFuture.length; i++) {
+                            const futInst = pendingFuture[i];
+                            const interes = saldo * rateMonthly;
+                            let amortizacion = newCuota - interes;
+
+                            if (i === pendingFuture.length - 1) {
+                                amortizacion = saldo; // Ajuste por redondeo al final
+                                newCuota = interes + amortizacion;
+                            }
+
+                            const saldoInicial = saldo;
+                            saldo -= amortizacion;
+                            if (saldo < 0.01) saldo = 0;
+
+                            await prisma.installment.update({
+                                where: { id: futInst.id },
+                                data: {
+                                    initialBalance: saldoInicial,
+                                    interest: interes,
+                                    amortization: amortizacion,
+                                    totalInstallment: newCuota,
+                                    finalBalance: saldo
+                                }
+                            });
+                        }
+                    }
+                }
             }
-        });
+        }
 
         const updatedCredit = await prisma.credit.findUnique({
             where: { id: creditId },

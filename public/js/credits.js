@@ -94,14 +94,17 @@ window.initPage_credits = function() {
                                         <td>${cuota.installmentNumber}</td>
                                         <td style="color: var(--success)">${formatter.format(cuota.amortization)}</td>
                                         <td style="color: var(--danger)">${formatter.format(cuota.interest)}</td>
-                                        <td style="font-weight: bold;">${formatter.format(cuota.totalInstallment)}</td>
+                                        <td style="font-weight: bold;">
+                                            ${formatter.format(cuota.totalInstallment)}
+                                            ${!isPaid && cuota.amountPaid ? `<br><small style="color:var(--text-muted);font-weight:normal">Falta: ${formatter.format(cuota.totalInstallment - cuota.amountPaid)}</small>` : ''}
+                                        </td>
                                         <td>
                                             <span class="status-badge ${isPaid ? 'status-paid' : 'status-pending'}">
-                                                ${isPaid ? (cuota.amountPaid ? `Pagada (${formatter.format(cuota.amountPaid)})` : 'Pagada') : 'Pendiente'}
+                                                ${isPaid ? (cuota.amountPaid ? `Pagada (${formatter.format(cuota.amountPaid)})` : 'Pagada') : (cuota.amountPaid ? `Abonado ${formatter.format(cuota.amountPaid)}` : 'Pendiente')}
                                             </span>
                                         </td>
                                         <td>
-                                            <button class="pay-btn" ${isPaid ? 'disabled' : ''} onclick="payInstallment('${credit.id}', ${cuota.installmentNumber}, ${cuota.totalInstallment})">
+                                            <button class="pay-btn" ${isPaid ? 'disabled' : ''} onclick="payInstallment('${credit.id}', ${cuota.installmentNumber}, ${cuota.totalInstallment - (cuota.amountPaid || 0)})">
                                                 <i class="fas fa-check-circle"></i> ${isPaid ? 'Saldado' : 'Abonar'}
                                             </button>
                                         </td>
