@@ -186,7 +186,12 @@
                     <input type="text" id="txNote" class="form-control" placeholder="Opcional">
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 0.5rem;">Guardar Transacción</button>
+                <div style="display: flex; gap: 0.75rem; margin-top: 0.5rem;">
+                    <button type="submit" class="btn btn-primary" id="saveTxBtn" style="flex: 1;">Guardar Transacción</button>
+                    <button type="button" class="btn" id="saveAndAddBtn" style="flex: 1; background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.4); color: #a5b4fc;">
+                        <i class="fas fa-plus"></i> Guardar y Agregar Otro
+                    </button>
+                </div>
             </form>
         </div>
     </div>

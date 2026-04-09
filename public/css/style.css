@@ -384,7 +384,7 @@ body {
     z-index: 1000;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.3s;
+    transition: opacity 0.12s;
 }
 
 .modal-overlay.active {
@@ -400,7 +400,7 @@ body {
     max-width: 500px;
     padding: 2rem;
     transform: translateY(20px);
-    transition: transform 0.3s;
+    transition: transform 0.12s;
     max-height: 90vh;
     overflow-y: auto;
 }

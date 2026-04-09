@@ -11,6 +11,7 @@
         budgets:      ['/js/budgets.js'],
         loans:        ['/js/loans.js'],
         credits:      ['/js/credits.js'],
+        ai:           [], // placeholder — no scripts yet
     };
 
     let currentView = null;

@@ -101,8 +101,8 @@ window.initPage_credits = function() {
                                             </span>
                                         </td>
                                         <td>
-                                            <button class="pay-btn" ${isPaid ? 'disabled' : ''} onclick="payInstallment('${credit.id}', ${cuota.installmentNumber})">
-                                                <i class="fas fa-check-circle"></i> ${isPaid ? 'Saldado' : 'Marcar Pagada'}
+                                            <button class="pay-btn" ${isPaid ? 'disabled' : ''} onclick="payInstallment('${credit.id}', ${cuota.installmentNumber}, ${cuota.totalInstallment})">
+                                                <i class="fas fa-check-circle"></i> ${isPaid ? 'Saldado' : 'Abonar'}
                                             </button>
                                         </td>
                                     </tr>
@@ -132,8 +132,19 @@ window.initPage_credits = function() {
         }
     };
 
-    window.payInstallment = async function (creditId, installmentNumber) {
-        if (!confirm(`¿Estás seguro de marcar la cuota N° ${installmentNumber} como pagada?`)) return;
+    window.payInstallment = async function (creditId, installmentNumber, cuotaTotal) {
+        // Mostrar prompt con el monto sugerido (cuota completa)
+        const suggested = cuotaTotal ? cuotaTotal.toFixed(2) : '';
+        const input = prompt(
+            `Cuota N° ${installmentNumber}\nIngresa el monto que deseas abonar:`,
+            suggested
+        );
+        if (input === null) return; // canceló
+        const payAmount = parseFloat(input);
+        if (isNaN(payAmount) || payAmount <= 0) {
+            alert('Ingresa un monto válido mayor a cero.');
+            return;
+        }
 
         try {
             const res = await fetch(`/api/credits/${creditId}/pay`, {
@@ -142,15 +153,14 @@ window.initPage_credits = function() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ installmentNumber })
+                body: JSON.stringify({ installmentNumber, payAmount })
             });
 
             if (res.ok) {
-                // Reload credits fully to recalculate stats
                 loadCredits();
             } else {
                 const data = await res.json();
-                alert(data.error || 'Error al pagar cuota');
+                alert(data.error || 'Error al registrar el pago');
             }
         } catch (error) {
             console.error(error);
@@ -158,3 +168,4 @@ window.initPage_credits = function() {
         }
     };
 };
+

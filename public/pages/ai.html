@@ -1,0 +1,122 @@
+<style>
+.ai-hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+    text-align: center;
+    padding: 2rem;
+}
+.ai-icon-bg {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #6366f1, #0ea5e9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 0 60px rgba(99,102,241,0.4);
+    animation: ai-pulse 2.5s ease-in-out infinite;
+}
+@keyframes ai-pulse {
+    0%, 100% { box-shadow: 0 0 40px rgba(99,102,241,0.4); transform: scale(1); }
+    50%       { box-shadow: 0 0 80px rgba(99,102,241,0.7); transform: scale(1.05); }
+}
+.ai-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(14,165,233,0.2));
+    border: 1px solid rgba(99,102,241,0.4);
+    color: #a5b4fc;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.35rem 1rem;
+    border-radius: 999px;
+    margin-bottom: 1.25rem;
+}
+.ai-hero h1 {
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    font-weight: 700;
+    background: linear-gradient(135deg, #a5b4fc, #7dd3fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+}
+.ai-hero p {
+    color: var(--text-muted);
+    font-size: 1.05rem;
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 2rem;
+}
+.ai-features {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 2.5rem;
+}
+.ai-feature-pill {
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
+    border-radius: 0.75rem;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.ai-feature-pill i { color: #6366f1; }
+.coming-soon-btn {
+    background: linear-gradient(135deg, #6366f1, #0ea5e9);
+    color: white;
+    border: none;
+    padding: 0.9rem 2.5rem;
+    border-radius: 999px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: default;
+    opacity: 0.7;
+    letter-spacing: 0.05em;
+}
+</style>
+
+<main class="main-content">
+    <header class="header-top">
+        <h2><i class="fas fa-robot" style="color: #6366f1; margin-right: 0.5rem;"></i> Inteligencia Artificial</h2>
+    </header>
+
+    <div class="ai-hero">
+        <div class="ai-icon-bg">
+            <i class="fas fa-brain" style="color: white;"></i>
+        </div>
+
+        <div class="ai-badge">✦ Próximamente</div>
+
+        <h1>Tu Asesor Financiero con IA</h1>
+
+        <p>
+            Estamos construyendo un asistente de IA que analizará tus finanzas en tiempo real,
+            detectará patrones de gasto, sugerirá presupuestos inteligentes y te ayudará
+            a alcanzar tus metas financieras más rápido.
+        </p>
+
+        <div class="ai-features">
+            <div class="ai-feature-pill"><i class="fas fa-chart-line"></i> Análisis de patrones</div>
+            <div class="ai-feature-pill"><i class="fas fa-lightbulb"></i> Sugerencias de ahorro</div>
+            <div class="ai-feature-pill"><i class="fas fa-comments-dollar"></i> Chat financiero</div>
+            <div class="ai-feature-pill"><i class="fas fa-bullseye"></i> Metas automáticas</div>
+            <div class="ai-feature-pill"><i class="fas fa-exclamation-triangle"></i> Alertas de riesgo</div>
+        </div>
+
+        <button class="coming-soon-btn">
+            <i class="fas fa-lock" style="margin-right: 0.5rem;"></i> En desarrollo
+        </button>
+    </div>
+</main>

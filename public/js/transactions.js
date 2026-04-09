@@ -115,6 +115,17 @@ window.initPage_transactions = function() {
         txModal.classList.add('active');
     };
 
+    // Flag para saber si fue "Guardar y Agregar Otro"
+    let keepModalOpen = false;
+
+    const saveAndAddBtn = document.getElementById('saveAndAddBtn');
+    if (saveAndAddBtn) {
+        saveAndAddBtn.addEventListener('click', () => {
+            keepModalOpen = true;
+            txForm.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+        });
+    }
+
     // Save Interaction
     txForm.addEventListener('submit', async (e) => {
         e.preventDefault();
@@ -129,6 +140,7 @@ window.initPage_transactions = function() {
 
         if (type === 'transfer' && accountId === targetAccountId) {
             alert('Cuenta de origen y destino no pueden ser la misma.');
+            keepModalOpen = false;
             return;
         }
 
@@ -140,6 +152,10 @@ window.initPage_transactions = function() {
 
         const method = editingTxId ? 'PUT' : 'POST';
         const url = editingTxId ? `/api/transactions/${editingTxId}` : '/api/transactions';
+
+        // Deshabilitar botones durante el guardado
+        const btns = txForm.querySelectorAll('button');
+        btns.forEach(b => { b.disabled = true; });
 
         try {
             const res = await fetch(url, {
@@ -155,16 +171,33 @@ window.initPage_transactions = function() {
                 } catch {
                     alert(`El servidor devolvió un error ${res.status} y no se pudo procesar.`);
                 }
+                keepModalOpen = false;
                 return;
             }
 
-            txModal.classList.remove('active');
+            if (keepModalOpen) {
+                // Resetear form pero dejar modal abierto
+                const accountIdPrev = accountId;
+                const typePrev = type;
+                resetForm();
+                document.getElementById('txType').value = typePrev;
+                document.getElementById('txType').dispatchEvent(new Event('change'));
+                document.getElementById('txAccount').value = accountIdPrev;
+                keepModalOpen = false;
+            } else {
+                txModal.classList.remove('active');
+            }
             loadTransactions();
         } catch (error) {
             console.error('Save tx error:', error);
             alert('Error de conexión.');
+            keepModalOpen = false;
+        } finally {
+            btns.forEach(b => { b.disabled = false; });
         }
     });
+
+
 
     // Delete Interaction
     const deleteTransaction = async (id) => {

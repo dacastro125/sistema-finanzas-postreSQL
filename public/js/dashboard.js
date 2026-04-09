@@ -153,9 +153,15 @@ window.initPage_dashboard = function() {
 
         if (cashflowChart) {
             cashflowChart.destroy();
+            cashflowChart = null;
         }
 
-        Chart.register(ChartDataLabels);
+        // Registrar plugins de forma segura (en la SPA puede ejecutarse varias veces)
+        try {
+            if (typeof ChartDataLabels !== 'undefined') {
+                Chart.register(ChartDataLabels);
+            }
+        } catch (_) {}
         Chart.defaults.color = '#94A3B8';
         Chart.defaults.font.family = 'Inter';
 
