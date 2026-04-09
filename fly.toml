@@ -1,0 +1,29 @@
+# fly.toml — Configuración de Fly.io para FinanzasOS
+# Generado manualmente — reemplaza "your-app-name" con el nombre que elijas en fly launch
+
+app = "your-app-name"        # ← CAMBIA esto por el nombre de tu app en Fly.io
+primary_region = "mia"       # Miami (más cerca de Colombia)
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  NODE_ENV = "production"
+  PORT = "3000"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false   # ← MUY IMPORTANTE: deshabilita el sleep
+  auto_start_machines = true
+  min_machines_running = 1     # Mantiene al menos 1 máquina encendida
+
+  [http_service.concurrency]
+    type = "requests"
+    hard_limit = 250
+    soft_limit = 200
+
+[[vm]]
+  memory = "256mb"
+  cpu_kind = "shared"
+  cpus = 1
