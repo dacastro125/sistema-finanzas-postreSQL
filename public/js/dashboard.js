@@ -165,17 +165,25 @@ window.initPage_dashboard = function() {
         Chart.defaults.color = '#94A3B8';
         Chart.defaults.font.family = 'Inter';
 
+        let chartData = [income, expense];
+        let chartColors = ['#10B981', '#EF4444'];
+        let chartLabels = ['Ingresos', 'Gastos'];
+
+        // Avoid completely invisible doughnut when data is 0
+        if (income === 0 && expense === 0 && currentViewType === 'doughnut') {
+            chartData = [1];
+            chartLabels = ['Sin Movimientos'];
+            chartColors = ['#334155']; // grey for empty
+        }
+
         const chartConfig = {
             type: currentViewType === 'bar' ? 'bar' : 'doughnut',
             data: {
-                labels: ['Ingresos', 'Gastos'],
+                labels: chartLabels,
                 datasets: [{
                     label: 'Flujo del Mes',
-                    data: [income, expense],
-                    backgroundColor: [
-                        '#10B981', // success
-                        '#EF4444'  // danger
-                    ],
+                    data: chartData,
+                    backgroundColor: chartColors,
                     borderWidth: 0,
                     hoverOffset: 4
                 }]
@@ -201,7 +209,10 @@ window.initPage_dashboard = function() {
                             size: 13
                         },
                         formatter: (value, context) => {
+                            const label = context.chart.data.labels[context.dataIndex];
+                            if (label === 'Sin Movimientos') return '0 Movimientos';
                             if (value === 0) return '';
+                            
                             // Only show percentages for doughnut
                             if (currentViewType === 'doughnut') {
                                 const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
