@@ -37,11 +37,15 @@ window.initPage_credits = function() {
 
         let html = '';
         credits.forEach(credit => {
-            // El total a pagar ahora es la suma de lo cobrado/proyectado (tomando el mayor entre lo que realmente se pagó y la cuota esperada)
+            // El total a pagar ahora es la suma de lo cobrado/proyectado
             const totalToPay = credit.installments.reduce((sum, item) => sum + Math.max(item.totalInstallment, item.amountPaid || 0), 0);
             
             // Lo abonado es exactamente la suma de los amountPaid (que ya la BD se encarga de llenar)
-            const paidSum = credit.installments.reduce((sum, item) => sum + (item.amountPaid || 0), 0);
+            // Agregamos compatibilidad hacia atrás: si estaba 'paid' pero no tiene amountPaid, asumimos que fue la cuota completa
+            const paidSum = credit.installments.reduce((sum, item) => {
+                const amount = (item.status === 'paid' && !item.amountPaid) ? item.totalInstallment : (item.amountPaid || 0);
+                return sum + amount;
+            }, 0);
             
             const pendingSum = Math.max(0, totalToPay - paidSum);
 
