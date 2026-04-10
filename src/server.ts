@@ -3,6 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import compression from 'compression';
+import { prisma } from './utils/prisma';
 import authRoutes from './routes/authRoutes';
 import accountRoutes from './routes/accountRoutes';
 import categoryRoutes from './routes/categoryRoutes';
@@ -32,8 +33,16 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/credits', creditRoutes);
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
     console.log(`Server is running on http://localhost:${PORT}`);
+
+    // Aplicar esquema directo en base de datos para saltarse la capa del pool pgbouncer
+    try {
+        await prisma.$executeRawUnsafe('ALTER TABLE "Installment" ADD COLUMN IF NOT EXISTS "amountPaid" DOUBLE PRECISION DEFAULT 0;');
+        console.log('[schema] Ensured amountPaid column exists in Supabase');
+    } catch (e: any) {
+        console.error('[schema] Could not verify schema:', e.message);
+    }
 
     // ─── Self-ping para evitar el cold start en Render ─────────────────────
     // Render duerme tras 15 min de inactividad. Nos pingamos cada 4 min.
