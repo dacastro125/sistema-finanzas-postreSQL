@@ -39,7 +39,9 @@ app.listen(PORT, async () => {
     // Aplicar esquema directo en base de datos para saltarse la capa del pool pgbouncer
     try {
         await prisma.$executeRawUnsafe('ALTER TABLE "Installment" ADD COLUMN IF NOT EXISTS "amountPaid" DOUBLE PRECISION DEFAULT 0;');
-        console.log('[schema] Ensured amountPaid column exists in Supabase');
+        await prisma.$executeRawUnsafe('ALTER TABLE "Credit" ADD COLUMN IF NOT EXISTS "remainingDebt" DOUBLE PRECISION DEFAULT 0;');
+        await prisma.$executeRawUnsafe('ALTER TABLE "Credit" ADD COLUMN IF NOT EXISTS "monthlyInstallment" DOUBLE PRECISION DEFAULT 0;');
+        console.log('[schema] Ensured new columns exist in Supabase');
     } catch (e: any) {
         console.error('[schema] Could not verify schema:', e.message);
     }

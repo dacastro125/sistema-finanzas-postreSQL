@@ -19,7 +19,12 @@ export const CreditModel = {
         return credits as any;
     },
 
-    create: async (userId: string, data: Omit<Credit, 'id' | 'userId' | 'createdAt' | 'installments'> & { installments: Installment[] }): Promise<Credit> => {
+    create: async (userId: string, data: Omit<Credit, 'id' | 'userId' | 'createdAt' | 'installments' | 'remainingDebt' | 'monthlyInstallment'> & { installments: Installment[] }): Promise<Credit> => {
+        // Calcular deuda total esperada inicialmente
+        const initialDebt = data.installments.reduce((sum, i) => sum + i.totalInstallment, 0);
+        // Calcular la cuota esperada basada en la primera
+        const initialMonthly = data.installments.length > 0 ? data.installments[0].totalInstallment : 0;
+
         const newCredit = await prisma.credit.create({
             data: {
                 userId,
@@ -29,6 +34,8 @@ export const CreditModel = {
                 rateType: data.rateType,
                 term: data.term,
                 termType: data.termType,
+                remainingDebt: initialDebt,
+                monthlyInstallment: initialMonthly,
                 installments: {
                     create: data.installments.map(i => ({
                         installmentNumber: i.installmentNumber,
@@ -148,6 +155,30 @@ export const CreditModel = {
                 }
             }
         }
+        // Recalcular deuda restante y cuota actual y guardarla en la cabecera Credit
+        const allInsts = await prisma.installment.findMany({ 
+            where: { creditId },
+            orderBy: { installmentNumber: 'asc' }
+        });
+
+        // Misma fórmula del frontend para compatibilidad total
+        const totalToPay = allInsts.reduce((sum, item) => sum + Math.max(item.totalInstallment, item.amountPaid || 0), 0);
+        const paidSum = allInsts.reduce((sum, item) => {
+            const amount = (item.status === 'paid' && !item.amountPaid) ? item.totalInstallment : (item.amountPaid || 0);
+            return sum + amount;
+        }, 0);
+        const newRemainingDebt = Math.max(0, totalToPay - paidSum);
+        
+        const firstPending = allInsts.find(i => i.status === 'pending');
+        const newMonthlyInstallment = firstPending ? firstPending.totalInstallment : 0;
+
+        await prisma.credit.update({
+            where: { id: creditId },
+            data: {
+                remainingDebt: newRemainingDebt,
+                monthlyInstallment: newMonthlyInstallment
+            }
+        });
 
         const updatedCredit = await prisma.credit.findUnique({
             where: { id: creditId },
