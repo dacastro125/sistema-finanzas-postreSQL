@@ -55,7 +55,7 @@ function initAI() {
                 // 3. Imprimir respuesta
                 appendMessage('model', data.reply);
             } else {
-                appendMessage('model', `**Error de conexión:** ${data.error || 'Algo salió mal. Verifica si la clave API está configurada.'}`);
+                appendMessage('model', `**Error interno reportado por Gemini:**\n${data.details || 'Revisa tu terminal, el error fue silencioso.'}\n\n*Nota técnica: ${data.error}*`);
             }
 
         } catch (error) {

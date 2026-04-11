@@ -45,3 +45,16 @@ export const deleteCategory = async (req: AuthRequest, res: Response): Promise<v
         res.status(400).json({ error: error.message });
     }
 };
+
+export const updateCategory = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const userId = req.user!.id;
+        const categoryId = req.params.id as string;
+        const { name, color } = req.body;
+
+        const updatedCategory = await CategoryModel.update(categoryId, userId, { name, color });
+        res.json(updatedCategory);
+    } catch (error: any) {
+        res.status(400).json({ error: error.message });
+    }
+};

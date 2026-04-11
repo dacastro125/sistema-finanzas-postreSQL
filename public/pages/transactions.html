@@ -115,6 +115,43 @@
         </div>
     </div>
 
+    <!-- Seccion de Filtros -->
+    <div class="card animate-fade-in" style="animation-delay: 0.15s; margin-bottom: 1.5rem;">
+        <h3 class="card-title" style="margin-bottom: 1rem;"><i class="fas fa-filter"></i> Búsqueda y Filtros</h3>
+        <form id="txFilterForm" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Buscar (Descripción)</label>
+                <input type="text" id="filterSearch" class="form-control" placeholder="Ej. Uber, Cena...">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Categoría</label>
+                <select id="filterCategory" class="form-control">
+                    <option style="color:black" value="all">Todas las Categorías</option>
+                    <!-- Rellenado dinámicamente -->
+                </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Rango de Fechas</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="date" id="filterDateStart" class="form-control" title="Desde">
+                    <input type="date" id="filterDateEnd" class="form-control" title="Hasta">
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <label>Intervalo de Monto ($)</label>
+                <div style="display: flex; gap: 0.5rem;">
+                    <input type="number" step="0.01" id="filterAmountMin" class="form-control" placeholder="Mín">
+                    <input type="number" step="0.01" id="filterAmountMax" class="form-control" placeholder="Máx">
+                </div>
+            </div>
+            <div class="form-group" style="margin-bottom: 0; display: flex; align-items: flex-end;">
+                <button type="button" class="btn" id="clearFiltersBtn" style="background: var(--surface-border); border: none; width: 100%;">
+                    <i class="fas fa-times-circle"></i> Limpiar Filtros
+                </button>
+            </div>
+        </form>
+    </div>
+
     <div class="table-container animate-fade-in" style="animation-delay: 0.2s;">
         <h3 class="card-title" style="margin-bottom: 1rem;">Historial Completo</h3>
         <table class="data-table">

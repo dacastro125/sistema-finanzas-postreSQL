@@ -51,9 +51,15 @@ window.initPage_budgets = function() {
                             <span class="budget-color-indicator" style="background-color: ${item.color || '#94A3B8'};"></span>
                             ${item.categoryName}
                         </div>
-                        <div class="budget-actions">
-                            <button onclick="openBudgetModal('${item.categoryId}', '${item.categoryName}', ${item.limitAmount})" title="Editar Límite">
+                        <div class="budget-actions" style="display:flex; justify-content:flex-end;">
+                            <button onclick="openBudgetModal('${item.categoryId}', '${item.categoryName}', ${item.limitAmount})" title="Definir Límite de Presupuesto" style="color: var(--primary);">
+                                <i class="fas fa-coins"></i>
+                            </button>
+                            <button onclick="openCategoryManageModal('${item.categoryId}', '${item.categoryName}', '${item.color || '#94A3B8'}')" title="Editar Categoría" style="margin-left:8px;">
                                 <i class="fas fa-edit"></i>
+                            </button>
+                            <button onclick="deleteCategory('${item.categoryId}')" title="Destruir Categoría" style="color: var(--danger); margin-left:8px;">
+                                <i class="fas fa-trash"></i>
                             </button>
                         </div>
                     </div>
@@ -115,6 +121,99 @@ window.initPage_budgets = function() {
             btn.disabled = false;
         }
     });
+
+    window.deleteBudget = async (budgetId) => {
+        if (!confirm('¿Seguro que deseas eliminar este presupuesto? El progreso de esta categoría se dejará de medir independientemente de las transacciones.')) return;
+        
+        try {
+            const res = await fetch(`/api/budgets/${budgetId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                loadBudgets(); // Recargar la interfaz
+            } else {
+                alert('No se pudo eliminar el presupuesto');
+            }
+        } catch (error) {
+            console.error('Error deleting budget', error);
+        }
+    };
+
+    /** GESTIÓN DE CATEGORÍAS */
+    const categoryManageModal = document.getElementById('categoryManageModal');
+    const categoryForm = document.getElementById('categoryForm');
+    const closeCategoryManageModal = document.getElementById('closeCategoryManageModal');
+
+    window.openCategoryManageModal = (categoryId = '', categoryName = '', color = '#FF9800') => {
+        document.getElementById('sysCategId').value = categoryId;
+        document.getElementById('sysCategName').value = categoryName;
+        document.getElementById('sysCategColor').value = color;
+        categoryManageModal.classList.add('active');
+    };
+
+    if (closeCategoryManageModal) {
+        closeCategoryManageModal.addEventListener('click', () => {
+            categoryManageModal.classList.remove('active');
+        });
+    }
+
+    if (categoryForm) {
+        categoryForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const categoryId = document.getElementById('sysCategId').value;
+            const name = document.getElementById('sysCategName').value;
+            const color = document.getElementById('sysCategColor').value;
+            
+            const btn = document.getElementById('saveCategoryBtn');
+            btn.innerHTML = 'Guardando...';
+            btn.disabled = true;
+
+            try {
+                const method = categoryId ? 'PUT' : 'POST';
+                const url = categoryId ? `/api/categories/${categoryId}` : '/api/categories';
+                
+                const res = await fetch(url, {
+                    method,
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ name, color, type: 'expense' }) // Forzamos expense en vista presupuestos
+                });
+
+                if (res.ok) {
+                    categoryManageModal.classList.remove('active');
+                    loadBudgets(); // Recargar la lista
+                } else {
+                    const data = await res.json();
+                    alert(`Error: ${data.error || 'No se pudo guardar la categoría'}`);
+                }
+            } catch (error) {
+                console.error('Error guardando categoría', error);
+            } finally {
+                btn.innerHTML = 'Guardar Categoría';
+                btn.disabled = false;
+            }
+        });
+    }
+
+    window.deleteCategory = async (categoryId) => {
+        if (!confirm('¡PELIGRO! ¿Seguro que deseas eliminar esta categoría? ESTO ELIMINARÁ TAMBIÉN EL PRESUPUESTO y dejará todas tus transacciones pasadas sin cateogría asignada. Esta acción es destructiva.')) return;
+        
+        try {
+            const res = await fetch(`/api/categories/${categoryId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (res.ok) {
+                loadBudgets(); // Recargar la interfaz
+            } else {
+                alert('No se pudo eliminar la categoría');
+            }
+        } catch (error) {
+            console.error('Error deleting category', error);
+        }
+    };
 
     const logout = () => {
         localStorage.removeItem('token');

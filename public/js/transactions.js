@@ -15,6 +15,15 @@ window.initPage_transactions = function() {
     let categoriesData = [];
     let editingTxId = null;
 
+    // Filter Elements
+    const filterSearch = document.getElementById('filterSearch');
+    const filterCategory = document.getElementById('filterCategory');
+    const filterDateStart = document.getElementById('filterDateStart');
+    const filterDateEnd = document.getElementById('filterDateEnd');
+    const filterAmountMin = document.getElementById('filterAmountMin');
+    const filterAmountMax = document.getElementById('filterAmountMax');
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+
     // Load necessary data for dropdowns
     const loadSelectorsData = async () => {
         try {
@@ -24,6 +33,14 @@ window.initPage_transactions = function() {
             ]);
             accountsData = await accRes.json();
             categoriesData = await catRes.json();
+            
+            // Llenar selector de Categorías en el Filtro
+            if (filterCategory) {
+                const categoryOptions = categoriesData.map(c => `<option style="color:black" value="${c.id}">${c.name}</option>`).join('');
+                filterCategory.innerHTML = `<option style="color:black" value="all">Todas las Categorías</option>
+                                            <option style="color:black" value="transfer_cat">Transferencias Internas</option>
+                                            ${categoryOptions}`;
+            }
         } catch (error) {
             console.error('Error fetching selectors', error);
         }
@@ -226,6 +243,70 @@ window.initPage_transactions = function() {
         }
     };
 
+    // Filter Logic
+    const applyFilters = () => {
+        let filtered = [...transactionsData];
+
+        const searchQ = filterSearch.value.toLowerCase().trim();
+        const catId = filterCategory.value;
+        const dStart = filterDateStart.value;
+        const dEnd = filterDateEnd.value;
+        const aMin = filterAmountMin.value;
+        const aMax = filterAmountMax.value;
+
+        // Filtro: Descripción (Buscador)
+        if (searchQ) {
+            filtered = filtered.filter(tx => 
+                (tx.note && tx.note.toLowerCase().includes(searchQ))
+            );
+        }
+
+        // Filtro: Categoría
+        if (catId && catId !== 'all') {
+            if (catId === 'transfer_cat') {
+                filtered = filtered.filter(tx => tx.type === 'transfer');
+            } else {
+                filtered = filtered.filter(tx => tx.categoryId === catId && tx.type !== 'transfer');
+            }
+        }
+
+        // Filtro: Rango Fechas
+        if (dStart) {
+            filtered = filtered.filter(tx => tx.date.split('T')[0] >= dStart);
+        }
+        if (dEnd) {
+            filtered = filtered.filter(tx => tx.date.split('T')[0] <= dEnd);
+        }
+
+        // Filtro: Intervalo Montos
+        if (aMin !== '') {
+            filtered = filtered.filter(tx => tx.amount >= parseFloat(aMin));
+        }
+        if (aMax !== '') {
+            filtered = filtered.filter(tx => tx.amount <= parseFloat(aMax));
+        }
+
+        renderTable(filtered);
+    };
+
+    // Filter Listeners (Real-time)
+    if (filterSearch) {
+        [filterSearch, filterDateStart, filterDateEnd, filterAmountMin, filterAmountMax].forEach(input => {
+            input.addEventListener('input', applyFilters);
+        });
+        filterCategory.addEventListener('change', applyFilters);
+
+        clearFiltersBtn.addEventListener('click', () => {
+            filterSearch.value = '';
+            filterCategory.value = 'all';
+            filterDateStart.value = '';
+            filterDateEnd.value = '';
+            filterAmountMin.value = '';
+            filterAmountMax.value = '';
+            applyFilters();
+        });
+    }
+
     // Load Transactions & Chart
     const loadTransactions = async () => {
         try {
@@ -235,22 +316,22 @@ window.initPage_transactions = function() {
             transactionsData = await res.json();
 
             transactionsData.sort((a, b) => new Date(b.date) - new Date(a.date));
-            renderTable();
+            applyFilters(); // Initialize table through filters mapping
             renderChart();
         } catch (error) {
             txTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--danger);">Error al cargar historial.</td></tr>`;
         }
     };
 
-    const renderTable = () => {
-        if (transactionsData.length === 0) {
-            txTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">No hay transacciones registradas.</td></tr>`;
+    const renderTable = (itemsToRender = transactionsData) => {
+        if (itemsToRender.length === 0) {
+            txTableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; color: var(--text-muted);">No se encontraron transacciones que coincidan con la búsqueda.</td></tr>`;
             return;
         }
 
         const formatter = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
 
-        txTableBody.innerHTML = transactionsData.map(tx => {
+        txTableBody.innerHTML = itemsToRender.map(tx => {
             const isIncome = tx.type === 'income';
             
             // Forzar fecha neutra neutra para evitar conversiones -5h

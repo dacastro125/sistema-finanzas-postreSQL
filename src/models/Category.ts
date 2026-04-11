@@ -48,5 +48,15 @@ export const CategoryModel = {
         if (!category) throw new Error('Categoría no encontrada o no autorizada');
 
         await prisma.category.delete({ where: { id } });
+    },
+
+    update: async (id: string, userId: string, data: Partial<Omit<Category, 'id' | 'userId' | 'createdAt'>>): Promise<Category> => {
+        const category = await prisma.category.findFirst({ where: { id, userId } });
+        if (!category) throw new Error('Categoría no encontrada o no autorizada');
+
+        return await prisma.category.update({
+            where: { id },
+            data
+        });
     }
 };

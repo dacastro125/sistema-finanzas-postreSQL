@@ -11,6 +11,22 @@ export const TransactionModel = {
         });
     },
 
+    findPaginatedByUserId: async (userId: string, skip: number, take: number): Promise<{ data: Transaction[], total: number }> => {
+        const [data, total] = await prisma.$transaction([
+            prisma.transaction.findMany({
+                where: { userId },
+                orderBy: [
+                    { date: 'desc' },
+                    { createdAt: 'desc' }
+                ],
+                skip,
+                take
+            }),
+            prisma.transaction.count({ where: { userId } })
+        ]);
+        return { data, total };
+    },
+
     create: async (userId: string, data: Omit<Transaction, 'id' | 'userId' | 'createdAt'>): Promise<Transaction> => {
         return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             const newTransaction = await tx.transaction.create({
