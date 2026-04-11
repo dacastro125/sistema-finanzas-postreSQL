@@ -1,1 +1,1 @@
-fix: add retry logic to spa loadScript for 502 cold start resilience
+feat: advanced credit amortization logic for full re-calculation on extra payments, and partial status tracking

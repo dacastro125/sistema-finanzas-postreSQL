@@ -1,4 +1,4 @@
-window.initPage_dashboard = function() {
+window.initPage_dashboard = function () {
     const token = localStorage.getItem('token');
     if (!token) { window.location.href = '/index.html'; return; }
 
@@ -161,7 +161,7 @@ window.initPage_dashboard = function() {
             if (typeof ChartDataLabels !== 'undefined') {
                 Chart.register(ChartDataLabels);
             }
-        } catch (_) {}
+        } catch (_) { }
         Chart.defaults.color = '#94A3B8';
         Chart.defaults.font.family = 'Inter';
 
@@ -179,11 +179,14 @@ window.initPage_dashboard = function() {
         const chartConfig = {
             type: currentViewType === 'bar' ? 'bar' : 'doughnut',
             data: {
-                labels: chartLabels,
+                labels: ['Ingresos', 'Gastos'],
                 datasets: [{
                     label: 'Flujo del Mes',
-                    data: chartData,
-                    backgroundColor: chartColors,
+                    data: [income, expense],
+                    backgroundColor: [
+                        '#10B981', // success
+                        '#EF4444'  // danger
+                    ],
                     borderWidth: 0,
                     hoverOffset: 4
                 }]
@@ -212,7 +215,7 @@ window.initPage_dashboard = function() {
                             const label = context.chart.data.labels[context.dataIndex];
                             if (label === 'Sin Movimientos') return '0 Movimientos';
                             if (value === 0) return '';
-                            
+
                             // Only show percentages for doughnut
                             if (currentViewType === 'doughnut') {
                                 const total = context.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);

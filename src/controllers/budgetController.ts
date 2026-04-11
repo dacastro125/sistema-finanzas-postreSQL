@@ -20,11 +20,11 @@ export const getBudgetsWithProgress = async (req: AuthRequest, res: Response): P
             prisma.transaction.groupBy({
                 by: ['categoryId'],
                 _sum: { amount: true },
-                where: { 
-                    userId, 
-                    type: 'expense', 
-                    date: { startsWith: datePrefix }, 
-                    categoryId: { not: null } 
+                where: {
+                    userId,
+                    type: 'expense',
+                    date: { startsWith: datePrefix },
+                    categoryId: { not: null }
                 }
             })
         ]);
