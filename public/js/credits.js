@@ -37,17 +37,16 @@ window.initPage_credits = function() {
 
         let html = '';
         credits.forEach(credit => {
-            // El total a pagar ahora es la suma de lo cobrado/proyectado
-            const totalToPay = credit.installments.reduce((sum, item) => sum + Math.max(item.totalInstallment, item.amountPaid || 0), 0);
+            // Utilizamos el valor exacto proyectado de Remaining Debt calculado rápidamente en backend
+            const pendingSum = credit.remainingDebt || 0;
             
-            // Lo abonado es exactamente la suma de los amountPaid (que ya la BD se encarga de llenar)
-            // Agregamos compatibilidad hacia atrás: si estaba 'paid' pero no tiene amountPaid, asumimos que fue la cuota completa
+            // Lo abonado usa el valor real (pagos)
             const paidSum = credit.installments.reduce((sum, item) => {
                 const amount = (item.status === 'paid' && !item.amountPaid) ? item.totalInstallment : (item.amountPaid || 0);
                 return sum + amount;
             }, 0);
             
-            const pendingSum = Math.max(0, totalToPay - paidSum);
+            const totalToPay = pendingSum + paidSum;
 
             // Stats
             const progressPercent = Math.round((paidSum / totalToPay) * 100) || 0;
@@ -83,44 +82,46 @@ window.initPage_credits = function() {
                     </div>
 
                     <div class="credit-body" id="body-${credit.id}">
-                        <table class="installment-table">
-                            <thead>
-                                <tr>
-                                    <th>N° Cuota</th>
-                                    <th>Capital Abono</th>
-                                    <th>Interés</th>
-                                    <th>Total Cuota</th>
-                                    <th>Estado</th>
-                                    <th>Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${credit.installments.map(cuota => {
-                const isPaid = cuota.status === 'paid';
-                return `
-                                    <tr style="${isPaid ? 'opacity: 0.6;' : ''}">
-                                        <td>${cuota.installmentNumber}</td>
-                                        <td style="color: var(--success)">${formatter.format(cuota.amortization)}</td>
-                                        <td style="color: var(--danger)">${formatter.format(cuota.interest)}</td>
-                                        <td style="font-weight: bold;">
-                                            ${formatter.format(cuota.totalInstallment)}
-                                            ${!isPaid && cuota.amountPaid ? `<br><small style="color:var(--text-muted);font-weight:normal">Falta: ${formatter.format(cuota.totalInstallment - cuota.amountPaid)}</small>` : ''}
-                                        </td>
-                                        <td>
-                                            <span class="status-badge ${isPaid ? 'status-paid' : 'status-pending'}">
-                                                ${isPaid ? (cuota.amountPaid ? `Pagada (${formatter.format(cuota.amountPaid)})` : 'Pagada') : (cuota.amountPaid ? `Abonado ${formatter.format(cuota.amountPaid)}` : 'Pendiente')}
-                                            </span>
-                                        </td>
-                                        <td>
-                                            <button class="pay-btn" ${isPaid ? 'disabled' : ''} onclick="payInstallment('${credit.id}', ${cuota.installmentNumber}, ${cuota.totalInstallment - (cuota.amountPaid || 0)})">
-                                                <i class="fas fa-check-circle"></i> ${isPaid ? 'Saldado' : 'Abonar'}
-                                            </button>
-                                        </td>
+                        <div class="table-responsive">
+                            <table class="installment-table">
+                                <thead>
+                                    <tr>
+                                        <th>N° Cuota</th>
+                                        <th>Capital Abono</th>
+                                        <th>Interés</th>
+                                        <th>Total Cuota</th>
+                                        <th>Estado</th>
+                                        <th>Acción</th>
                                     </tr>
-                                    `;
-            }).join('')}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                    ${credit.installments.map(cuota => {
+                    const isPaid = cuota.status === 'paid';
+                    return `
+                                        <tr style="${isPaid ? 'opacity: 0.6;' : ''}">
+                                            <td>${cuota.installmentNumber}</td>
+                                            <td style="color: var(--success)">${formatter.format(cuota.amortization)}</td>
+                                            <td style="color: var(--danger)">${formatter.format(cuota.interest)}</td>
+                                            <td style="font-weight: bold;">
+                                                ${formatter.format(cuota.totalInstallment)}
+                                                ${!isPaid && cuota.amountPaid ? `<br><small style="color:var(--text-muted);font-weight:normal">Falta: ${formatter.format(cuota.totalInstallment - cuota.amountPaid)}</small>` : ''}
+                                            </td>
+                                            <td>
+                                                <span class="status-badge ${isPaid ? 'status-paid' : 'status-pending'}">
+                                                    ${isPaid ? (cuota.amountPaid ? `Pagada (${formatter.format(cuota.amountPaid)})` : 'Pagada') : (cuota.amountPaid ? `Abonado ${formatter.format(cuota.amountPaid)}` : 'Pendiente')}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <button class="pay-btn" ${isPaid ? 'disabled' : ''} onclick="payInstallment('${credit.id}', ${cuota.installmentNumber}, ${cuota.totalInstallment - (cuota.amountPaid || 0)})">
+                                                    <i class="fas fa-check-circle"></i> ${isPaid ? 'Saldado' : 'Abonar'}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        `;
+                }).join('')}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             `;

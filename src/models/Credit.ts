@@ -125,7 +125,8 @@ export const CreditModel = {
 
                         let saldo = newFinalBalance;
 
-                        // Se utiliza una serie de updates secuenciales
+                        // Construir el array en memoria (muy rápido) en vez de hacer 100 llamadas de a una
+                        const updatedInstallments = [];
                         for (let i = 0; i < pendingFuture.length; i++) {
                             const futInst = pendingFuture[i];
                             const interes = saldo * rateMonthly;
@@ -140,17 +141,27 @@ export const CreditModel = {
                             saldo -= amortizacion;
                             if (saldo < 0.01) saldo = 0;
 
-                            await prisma.installment.update({
-                                where: { id: futInst.id },
-                                data: {
-                                    initialBalance: saldoInicial,
-                                    interest: interes,
-                                    amortization: amortizacion,
-                                    totalInstallment: newCuota,
-                                    finalBalance: saldo
-                                }
+                            updatedInstallments.push({
+                                creditId: creditId,
+                                installmentNumber: futInst.installmentNumber,
+                                initialBalance: saldoInicial,
+                                interest: interes,
+                                amortization: amortizacion,
+                                totalInstallment: newCuota,
+                                finalBalance: saldo,
+                                status: 'pending',
+                                amountPaid: 0
                             });
                         }
+
+                        // Eliminamos las cuotas viejas pendientes de golpe
+                        await prisma.installment.deleteMany({
+                            where: { creditId, installmentNumber: { gt: installmentNumber } }
+                        });
+                        // Insertamos las nuevas cuotas calculadas de golpe (Bulk Insert) - Instantáneo
+                        await prisma.installment.createMany({
+                            data: updatedInstallments
+                        });
                     }
                 }
             }
