@@ -1,122 +1,240 @@
 <style>
-.ai-hero {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 70vh;
-    text-align: center;
-    padding: 2rem;
-}
-.ai-icon-bg {
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #6366f1, #0ea5e9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 3rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 0 60px rgba(99,102,241,0.4);
-    animation: ai-pulse 2.5s ease-in-out infinite;
-}
-@keyframes ai-pulse {
-    0%, 100% { box-shadow: 0 0 40px rgba(99,102,241,0.4); transform: scale(1); }
-    50%       { box-shadow: 0 0 80px rgba(99,102,241,0.7); transform: scale(1.05); }
-}
-.ai-badge {
-    display: inline-block;
-    background: linear-gradient(135deg, rgba(99,102,241,0.2), rgba(14,165,233,0.2));
-    border: 1px solid rgba(99,102,241,0.4);
-    color: #a5b4fc;
-    font-size: 0.75rem;
-    font-weight: 700;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    padding: 0.35rem 1rem;
-    border-radius: 999px;
-    margin-bottom: 1.25rem;
-}
-.ai-hero h1 {
-    font-size: clamp(1.8rem, 4vw, 2.8rem);
-    font-weight: 700;
-    background: linear-gradient(135deg, #a5b4fc, #7dd3fc);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 1rem;
-}
-.ai-hero p {
-    color: var(--text-muted);
-    font-size: 1.05rem;
-    max-width: 520px;
-    line-height: 1.7;
-    margin-bottom: 2rem;
-}
-.ai-features {
-    display: flex;
-    gap: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin-bottom: 2.5rem;
-}
-.ai-feature-pill {
-    background: var(--surface);
-    border: 1px solid var(--surface-border);
-    border-radius: 0.75rem;
-    padding: 0.6rem 1.2rem;
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-.ai-feature-pill i { color: #6366f1; }
-.coming-soon-btn {
-    background: linear-gradient(135deg, #6366f1, #0ea5e9);
-    color: white;
-    border: none;
-    padding: 0.9rem 2.5rem;
-    border-radius: 999px;
-    font-size: 1rem;
-    font-weight: 600;
-    cursor: default;
-    opacity: 0.7;
-    letter-spacing: 0.05em;
-}
+    .ai-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 120px);
+        background: var(--surface);
+        border: 1px solid var(--surface-border);
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+
+    .chat-header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--surface-border);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: rgba(30, 41, 59, 0.4);
+    }
+
+    .ai-avatar {
+        width: 45px;
+        height: 45px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #818CF8, #C084FC);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-size: 1.5rem;
+        box-shadow: 0 4px 10px rgba(129, 140, 248, 0.3);
+    }
+
+    .chat-messages {
+        flex: 1;
+        padding: 1.5rem;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+        scrollbar-width: thin;
+        scrollbar-color: var(--primary) transparent;
+    }
+
+    .message-row {
+        display: flex;
+        gap: 1rem;
+        max-width: 85%;
+    }
+
+    .message-row.model {
+        align-self: flex-start;
+    }
+
+    .message-row.user {
+        align-self: flex-end;
+        flex-direction: row-reverse;
+    }
+
+    .msg-avatar {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: var(--surface-border);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-shrink: 0;
+    }
+
+    .message-row.user .msg-avatar {
+        background: var(--primary);
+    }
+
+    .message-row.model .msg-avatar {
+        background: linear-gradient(135deg, #818CF8, #C084FC);
+        color: white;
+    }
+
+    .msg-bubble {
+        padding: 1rem;
+        border-radius: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid var(--surface-border);
+        color: var(--text-main);
+        line-height: 1.6;
+        font-size: 0.95rem;
+    }
+
+    .message-row.user .msg-bubble {
+        background: var(--primary);
+        border-color: var(--primary-hover);
+        color: white;
+        border-top-right-radius: 0;
+    }
+
+    .message-row.model .msg-bubble {
+        border-top-left-radius: 0;
+    }
+
+    /* Basic Markdown support inside chat */
+    .msg-bubble strong { color: white; font-weight: 600; }
+    .msg-bubble p { margin-bottom: 0.75rem; }
+    .msg-bubble p:last-child { margin-bottom: 0; }
+    .msg-bubble ul, .msg-bubble ol { margin-left: 1.5rem; margin-bottom: 0.75rem; }
+    .msg-bubble li { margin-bottom: 0.25rem; }
+
+    .chat-input-area {
+        padding: 1rem;
+        border-top: 1px solid var(--surface-border);
+        background: rgba(30, 41, 59, 0.4);
+    }
+
+    .input-wrapper {
+        display: flex;
+        gap: 0.5rem;
+        background: rgba(15, 23, 42, 0.5);
+        border: 1px solid var(--surface-border);
+        border-radius: 2rem;
+        padding: 0.5rem 0.5rem 0.5rem 1.5rem;
+        align-items: center;
+        transition: border-color 0.2s;
+    }
+
+    .input-wrapper:focus-within {
+        border-color: var(--primary);
+    }
+
+    #chatInput {
+        flex: 1;
+        background: transparent;
+        border: none;
+        color: white;
+        font-size: 1rem;
+        outline: none;
+        font-family: inherit;
+    }
+
+    .send-btn {
+        background: var(--primary);
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: transform 0.2s, background 0.2s;
+    }
+
+    .send-btn:hover {
+        background: var(--primary-hover);
+        transform: scale(1.05);
+    }
+    
+    .send-btn:disabled {
+        background: var(--surface-border);
+        cursor: not-allowed;
+        transform: none;
+        color: var(--text-muted);
+    }
+
+    /* Typing indicator */
+    .typing-indicator {
+        display: none;
+        align-items: center;
+        gap: 4px;
+        padding: 1rem;
+    }
+    .typing-indicator.active { display: flex; }
+    
+    .dot {
+        width: 6px; height: 6px;
+        background: var(--text-muted);
+        border-radius: 50%;
+        animation: typing 1.4s infinite ease-in-out both;
+    }
+    .dot:nth-child(1) { animation-delay: -0.32s; }
+    .dot:nth-child(2) { animation-delay: -0.16s; }
+
+    @keyframes typing {
+        0%, 80%, 100% { transform: scale(0); }
+        40% { transform: scale(1); }
+    }
 </style>
 
 <main class="main-content">
     <header class="header-top">
-        <h2><i class="fas fa-robot" style="color: #6366f1; margin-right: 0.5rem;"></i> Inteligencia Artificial</h2>
+        <div style="display: flex; align-items: center; gap: 1rem;">
+            <h2>Inteligencia Artificial</h2>
+        </div>
     </header>
 
-    <div class="ai-hero">
-        <div class="ai-icon-bg">
-            <i class="fas fa-brain" style="color: white;"></i>
+    <div class="ai-wrapper animate-fade-in">
+        <div class="chat-header">
+            <div class="ai-avatar">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div>
+                <h3 style="font-size: 1.1rem; margin-bottom:0.2rem">Sensei Financiero</h3>
+                <p style="font-size: 0.85rem; color: var(--text-muted);">Asistente empoderado por Gemini AI</p>
+            </div>
         </div>
 
-        <div class="ai-badge">✦ Próximamente</div>
-
-        <h1>Tu Asesor Financiero con IA</h1>
-
-        <p>
-            Estamos construyendo un asistente de IA que analizará tus finanzas en tiempo real,
-            detectará patrones de gasto, sugerirá presupuestos inteligentes y te ayudará
-            a alcanzar tus metas financieras más rápido.
-        </p>
-
-        <div class="ai-features">
-            <div class="ai-feature-pill"><i class="fas fa-chart-line"></i> Análisis de patrones</div>
-            <div class="ai-feature-pill"><i class="fas fa-lightbulb"></i> Sugerencias de ahorro</div>
-            <div class="ai-feature-pill"><i class="fas fa-comments-dollar"></i> Chat financiero</div>
-            <div class="ai-feature-pill"><i class="fas fa-bullseye"></i> Metas automáticas</div>
-            <div class="ai-feature-pill"><i class="fas fa-exclamation-triangle"></i> Alertas de riesgo</div>
+        <div class="chat-messages" id="chatBox">
+            <!-- Welcome message -->
+            <div class="message-row model">
+                <div class="msg-avatar">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <div class="msg-bubble">
+                    <p>Hola, mi nombre es <strong>Sensei</strong>. Tengo acceso privado al panorama completo de tus finanzas en tiempo real.</p>
+                    <p>Puedes preguntarme cosas como:</p>
+                    <ul>
+                        <li>"¿En qué categoría he gastado más este mes?"</li>
+                        <li>"Basado en mis cuentas, ¿puedo adelantar el pago de mi crédito hipotecario?"</li>
+                        <li>"Hazme un resumen de mi salud financiera general."</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>
         </div>
 
-        <button class="coming-soon-btn">
-            <i class="fas fa-lock" style="margin-right: 0.5rem;"></i> En desarrollo
-        </button>
+        <div class="chat-input-area">
+            <form id="chatForm">
+                <div class="input-wrapper">
+                    <input type="text" id="chatInput" placeholder="Pregúntale a tu asistente financiero..." autocomplete="off">
+                    <button type="submit" class="send-btn" id="sendBtn">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </main>

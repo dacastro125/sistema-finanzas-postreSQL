@@ -11,6 +11,7 @@ import transactionRoutes from './routes/transactionRoutes';
 import dashboardRoutes from './routes/dashboardRoutes';
 import budgetRoutes from './routes/budgetRoutes';
 import creditRoutes from './routes/creditRoutes';
+import aiRoutes from './routes/aiRoutes';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -32,6 +33,7 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/credits', creditRoutes);
+app.use('/api/ai', aiRoutes);
 
 app.listen(PORT, async () => {
     console.log(`Server is running on http://localhost:${PORT}`);
